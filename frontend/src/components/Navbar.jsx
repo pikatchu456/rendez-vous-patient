@@ -9,13 +9,15 @@ const Navbar = () => {
   const pathname = useLocation().pathname;
   const routes = useRoutes();
 
-  const { Theme, toggleTheme } = useContext(ThemeContext);
+  const { theme, toggleTheme } = useContext(ThemeContext);
   return (
     <div className="navbar dark:bg-slate-900 duration-300 ease-in-out dark:text-white fixed row-[1] h-[60px] md:pr-[250px] w-full flex items-center justify-between px-6 shadow ">
       {routes.map(
         (item) =>
           item.path === pathname && (
-            <h1 className="text-2xl font-bold">{item.title}</h1>
+            <h1 className="text-2xl font-bold  key={item.path}">
+              {item.title}
+            </h1>
           )
       )}
       <div
