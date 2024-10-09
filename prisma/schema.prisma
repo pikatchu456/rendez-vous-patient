@@ -26,7 +26,8 @@ model Dentiste {
   id_dentiste  String @id @default(auto()) @map("_id") @db.ObjectId
   nom_dentiste String
   prenom_dentiste String
-  telephone String
+  telephone String @unique
+  email String @unique
 
   // Un dentiste s'occupe d'une ou plusieurs consultations
   consultations Consultation[]
@@ -45,7 +46,7 @@ model Patient {
   prenom_patient String
   age Int
   quartier String
-  telephone String
+  telephone String @unique
 
   // Un patient peut faire une ou plusieurs consultations
   consultations Consultation[]
@@ -59,8 +60,8 @@ model Compte {
   id_compte  String @id @default(auto()) @map("_id") @db.ObjectId
   nom_utilisateur String @unique
   email String @unique
-  clerkId String @unique
-  role Role @default(PATIENT)
+  clerkId String? @unique
+  role Role? @default(PATIENT)
 
   // Un compte appartient à un dentiste
   dentiste Dentiste? 

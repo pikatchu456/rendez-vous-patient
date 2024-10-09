@@ -75,10 +75,53 @@ const deletePatient = asyncHandler(async (req, res, next) => {
   });
 });
 
+const createAccount = asyncHandler(async (req, res, next) => {
+  const { email } = req.body;
+  // Vérifier si l'email correspond à un dentiste sans compte
+  const dentiste = await db.dentiste.findUnique({
+    where: { email },
+    include: { compte: true },
+  });
+
+  // Vérifier si le dentiste a déjà un compte
+  if (dentiste && dentiste.compte) {
+    return res.status(400).json({
+      message: "Cet email appartient déjà à un dentiste avec un compte.",
+    });
+  }
+
+  if (dentiste) {
+    // Créer un compte dentiste
+    const newCompte = await db.compte.create({
+      data: {
+        ...req.body,
+        role: "DENTISTE", // Définir le rôle comme dentiste
+        dentiste: { connect: { id_dentiste: dentiste.id_dentiste } },
+      },
+    });
+
+    return res
+      .status(201)
+      .json({ message: "Compte dentiste créé.", compte: newCompte });
+  }
+
+  // Si l'email n'appartient pas à un dentiste, créer un compte patient par défaut
+  const newComptePatient = await db.compte.create({
+    data: {
+      ...req.body, // Rôle par défaut : patient (le modèle prévoit un rôle par défaut PATIENT)
+    },
+  });
+
+  res
+    .status(201)
+    .json({ message: "Compte patient créé.", compte: newComptePatient });
+});
+
 export {
   getPatient,
   getPatientById,
   createPatient,
   updatePatient,
   deletePatient,
+  createAccount,
 };

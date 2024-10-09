@@ -1,15 +1,25 @@
 import { useMemo } from "react";
 import {
   GoCommentDiscussion,
-  GoDownload,
   GoHome,
-  GoPackage,
-  GoShareAndroid,
+  GoTasklist,
+  GoCalendar,
 } from "react-icons/go";
+import { FaTooth, FaUserInjured } from "react-icons/fa";
 
 import { useLocation } from "react-router-dom";
 
 export const useRoutes = () => {
+
+  const DentisteIcon = () => (
+    <FaTooth style={{ color: "white", stroke: "black", strokeWidth: 40 }} />
+  );
+  const PatientIcon = () => (
+    <FaUserInjured
+      style={{ color: "white", stroke: "black", strokeWidth: 40 }}
+    />
+  );
+
   const location = useLocation().pathname;
 
   const routes = useMemo(() => [
@@ -20,28 +30,34 @@ export const useRoutes = () => {
       active: location === "/",
     },
     {
-      title: "Documents",
-      icon: GoDownload,
-      path: "/documents",
-      active: location === "/documents",
+      title: "Dentiste",
+      icon: DentisteIcon,
+      path: "/dentiste",
+      active: location === "/dentiste",
     },
     {
-      title: "Analytics",
-      icon: GoShareAndroid,
-      path: "/analytics",
-      active: location === "/analytics",
+      title: "Patient",
+      icon: PatientIcon,
+      path: "/patient",
+      active: location === "/patient",
     },
     {
-      title: "Contact",
+      title: "Planification",
+      icon: GoCalendar, // Remplacez par une icône appropriée si nécessaire
+      path: "/planification",
+      active: location === "/planification",
+    },
+    {
+      title: "Message",
       icon: GoCommentDiscussion,
-      path: "/contact",
-      active: location === "/contact",
+      path: "/message",
+      active: location === "/message",
     },
     {
-      title: "Pages",
-      icon: GoPackage,
-      path: "/pages",
-      active: location === "/pages",
+      title: "Consultation",
+      icon: GoTasklist, // Remplacez par une icône appropriée si nécessaire
+      path: "/consultation",
+      active: location === "/consultation",
     },
   ]);
 

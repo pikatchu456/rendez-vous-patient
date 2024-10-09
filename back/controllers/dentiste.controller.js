@@ -9,10 +9,10 @@ const getDentiste = asyncHandler(async (req, res, next) => {
 
 // Récupérer un dentiste par ID
 const getDentisteById = asyncHandler(async (req, res, next) => {
-  const id = req.params.id;
+  const id_dentiste = req.params.id_dentiste;
   const result = await db.dentiste.findUnique({
     where: {
-      id_dentiste: id,
+      id_dentiste: id_dentiste,
     },
   });
 
@@ -41,12 +41,12 @@ const createDentiste = asyncHandler(async (req, res, next) => {
 
 // Mettre à jour un dentiste existant
 const updateDentiste = asyncHandler(async (req, res, next) => {
-  const id = req.params.id;
+  const id_dentiste = req.params.id_dentiste;
   const body = req.body;
 
   const result = await db.dentiste.update({
     where: {
-      id_dentiste: id,
+      id_dentiste: id_dentiste,
     },
     data: {
       ...body,
@@ -61,11 +61,11 @@ const updateDentiste = asyncHandler(async (req, res, next) => {
 
 // Supprimer un dentiste
 const deleteDentiste = asyncHandler(async (req, res, next) => {
-  const id = req.params.id;
+  const id_dentiste = req.params.id_dentiste;
 
   const result = await db.dentiste.delete({
     where: {
-      id_dentiste: id,
+      id_dentiste: id_dentiste,
     },
   });
 

@@ -1,78 +1,81 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import Input from "../components/Input.jsx";
 import Button from "../components/Button.jsx";
-import { Link } from 'react-router-dom';
+import { Link } from "react-router-dom";
+
+import * as yup from "yup";
+import { yupResolver } from "@hookform/resolvers/yup";
+import { useForm } from "react-hook-form";
+import { SignUp } from "@clerk/clerk-react";
+import { useCheckEmailMutation } from "../redux/slices/patient.api.slice.jsx";
+
 
 const SignUpOne = () => {
-  const [isCorrectCode, setIsCorrectCode] = useState(false);
-  const [pendingVerification, setPendingVerification] = useState(false);
+  const schema = yup.object().shape({
+    email: yup.string().email("Email invalide").required("Champs requis"),
+    password: yup.string().required("Champs requis"),
+    confirm_password: yup
+      .string()
+      .oneOf(
+        [yup.ref("password"), null],
+        "Les mots de passe doivent correspondre"
+      )
+      .required("Champs requis"),
+  });
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm({ resolver: yupResolver(schema) });
+
+  const [checkEmail, { isLoading }] = useCheckEmailMutation();
+
+  const onSubmit = async (data) => {
+    try {
+      const response = await checkEmail({ email: data.email }).unwrap();
+      console.log("Success:", response);
+    } catch (error) {
+      console.error("Failed:", error);
+    }
+  };
+
   return (
     <main className="w-full h-screen grid grid-cols-1 sm:grid-cols-2">
-      {/* Section du formulaire à gauche */}
+      {/* Formulaire principal */}
       <div className="flex justify-center items-center flex-col sm:px-8">
-        <h1 className="text-center font-bold text-2xl py-6 px-8">
-          Sign up pour creer un compte
-        </h1>
-        <h1 className="text-center mb-8">Entrer votre email</h1>
-        {!isCorrectCode && (
-          <form className="w-full px-8 flex flex-col space-y-4">
-            <Input name="email" type="text" label="Register email" />
-            <Button
-              onClick={() => {
-                setIsCorrectCode(true);
-              }}
-              type="submit"
-            >
-              Check Email
-            </Button>
-          </form>
-        )}
-        {isCorrectCode && !pendingVerification && (
-          <form className="w-full px-8 flex flex-col space-y-4">
-            <Input name="Email" type="text" label="Email" />
-            <Input name="Username" type="text" label="Username" />
-            <Input name="Password" type="password" label="Password" />
-            <Input
-              name="Confirm Password"
-              type="password"
-              label="Confirm Password"
-            />
-            <Button
-              onClick={() => {
-                setPendingVerification(true);
-              }}
-            >
-              Sign up
-            </Button>
-          </form>
-        )}
-        {pendingVerification && (
-          <form className="w-full px-8 flex flex-col space-y-4">
-            <Input
-              name="code"
-              type="text"
-              label="Entrer le code de validation"
-            />
-            <Button
-              onClick={() => {
-                setIsCorrectCode(true);
-              }}
-              type="submit"
-            >
-              Check Code
-            </Button>
-          </form>
-        )}
-        <p className="my-4">
-          Vous avez déja un compte?{" "}
-          <Link to="/">
-            <span className="inline-block relative cursor-pointer transition-all duration-500 sm:before:content-[''] sm:before:absolute sm:before:-bottom-2 sm:before:left-0 sm:before:w-0 sm:before:h-1.5 sm:before:rounded-full sm:before:opacity-0 sm:before:transition-all sm:before:duration-500 sm:before:bg-gradient-to-r sm:before:from-sky-300 sm:before:via-sky-400 sm:before:to-sky-500 sm:hover:before:w-full sm:hover:before:opacity-100 underline sm:no-underline">
-              Sign In
-            </span>
-          </Link>
-        </p>
+        <h1 className="text-center font-bold text-2xl py-6">Sign Up</h1>
+        <h2 className="text-center mb-8">Remplir le formulaire</h2>
+
+        <form
+          onSubmit={handleSubmit(onSubmit)}
+          className="w-full px-8 flex flex-col space-y-4"
+        >
+          <Input
+            error={errors.email?.message}
+            {...register("email")}
+            name="email"
+            type="email"
+            label="Register email"
+          />
+
+          <Input
+            {...register("password")}
+            name="password"
+            type="password"
+            label="Mot de passe"
+            error={errors.password?.message}
+          />
+          <Input
+            {...register("confirm_password")}
+            name="confirm_password"
+            type="password"
+            label="Confirmer le mot de passe"
+            error={errors.confirm_password?.message}
+          />
+          <Button type="submit">Sign Up</Button>
+        </form>
       </div>
-      {/* Section de l'image à droite */}
       <div className="hidden sm:block">
         <img
           src="/photo/Capture2.PNG"
@@ -82,6 +85,7 @@ const SignUpOne = () => {
       </div>
     </main>
   );
-}
+};
 
-export default SignUpOne
+export default SignUpOne;
+
