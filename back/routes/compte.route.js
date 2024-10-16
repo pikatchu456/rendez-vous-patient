@@ -17,6 +17,8 @@ compte_router
   .post("/dentiste_intervenant", createCompteDentisteIntervenant)
   .post("/patient", createComptePatient);
 
-compte_router.get("/:id", getCompteByClerkId).delete("/:id", deleteAnCompte);
+compte_router
+  .get("/:id_compte", getCompteByClerkId)
+  .delete("/:id_compte", deleteAnCompte);
 
 export default compte_router;

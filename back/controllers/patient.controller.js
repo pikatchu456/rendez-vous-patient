@@ -9,10 +9,10 @@ const getPatient = asyncHandler(async (req, res, next) => {
 
 // Récupérer un patient par ID
 const getPatientById = asyncHandler(async (req, res, next) => {
-  const id = req.params.id;
+  const id_patient = req.params.id_patient;
   const result = await db.patient.findUnique({
     where: {
-      id_patient: id,
+      id_patient: id_patient,
     },
   });
 
@@ -41,12 +41,12 @@ const createPatient = asyncHandler(async (req, res, next) => {
 
 // Mettre à jour un patient existant
 const updatePatient = asyncHandler(async (req, res, next) => {
-  const id = req.params.id;
+  const id_patient = req.params.id_patient;
   const body = req.body;
 
   const result = await db.patient.update({
     where: {
-      id_patient: id,
+      id_patient: id_patient,
     },
     data: {
       ...body,
@@ -61,11 +61,11 @@ const updatePatient = asyncHandler(async (req, res, next) => {
 
 // Supprimer un patient
 const deletePatient = asyncHandler(async (req, res, next) => {
-  const id = req.params.id;
+  const id_patient = req.params.id_patient;
 
   const result = await db.patient.delete({
     where: {
-      id_patient: id,
+      id_patient: id_patient,
     },
   });
 

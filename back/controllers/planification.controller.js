@@ -9,10 +9,10 @@ const getPlanification = asyncHandler(async (req, res, next) => {
 
 // Récupérer une planification par ID
 const getPlanificationById = asyncHandler(async (req, res, next) => {
-  const id = req.params.id;
+  const id_planification = req.params.id_planification;
   const result = await db.planification.findUnique({
     where: {
-      id_planification: id,
+      id_planification: id_planification,
     },
   });
 
@@ -41,12 +41,12 @@ const createPlanification = asyncHandler(async (req, res, next) => {
 
 // Mettre à jour une planification existante
 const updatePlanification = asyncHandler(async (req, res, next) => {
-  const id = req.params.id;
+  const id_planification = req.params.id_planification;
   const body = req.body;
 
   const result = await db.planification.update({
     where: {
-      id_planification: id,
+      id_planification: id_planification,
     },
     data: {
       ...body,
@@ -61,11 +61,11 @@ const updatePlanification = asyncHandler(async (req, res, next) => {
 
 // Supprimer une planification
 const deletePlanification = asyncHandler(async (req, res, next) => {
-  const id = req.params.id;
+  const id_planification = req.params.id_planification;
 
   const result = await db.planification.delete({
     where: {
-      id_planification: id,
+      id_planification: id_planification,
     },
   });
 

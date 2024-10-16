@@ -1,10 +1,13 @@
 import { Router } from "express";
 
-import { getDentiste, getDentisteById, createDentiste, updateDentiste, deleteDentiste } from "../controllers/dentiste.controller.js";
+import { getDentiste, getDentisteById, createDentiste, updateDentiste, deleteDentiste, checkCode } from "../controllers/dentiste.controller.js";
 
 const dentiste_router = Router()
 
-dentiste_router.get("/", getDentiste).post("/", createDentiste);
+dentiste_router
+  .get("/", getDentiste)
+  .post("/", createDentiste)
+  .post("/code", checkCode);
 
 dentiste_router
   .get("/:id_dentiste", getDentisteById)

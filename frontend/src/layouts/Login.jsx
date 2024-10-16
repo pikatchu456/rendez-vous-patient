@@ -79,7 +79,7 @@ const Login = () => {
         </form>
         <p className="my-4">
           Vous n'avez pas de compte?{"   "}
-          <Link to="/signup">
+          <Link to="/signup1">
             <span className="inline-block relative cursor-pointer transition-all duration-500 sm:before:content-[''] sm:before:absolute sm:before:-bottom-2 sm:before:left-0 sm:before:w-0 sm:before:h-1.5 sm:before:rounded-full sm:before:opacity-0 sm:before:transition-all sm:before:duration-500 sm:before:bg-gradient-to-r sm:before:from-sky-300 sm:before:via-sky-400 sm:before:to-sky-500 sm:hover:before:w-full sm:hover:before:opacity-100 underline sm:no-underline">
               Créer un compte
             </span>

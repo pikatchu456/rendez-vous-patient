@@ -11,6 +11,21 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model Consultation {
+  id_consultation  String @id @default(auto()) @map("_id") @db.ObjectId  
+  date_consultation DateTime
+  motif String
+  status String
+
+  // Une consultation appartient à un dentiste
+  id_dentiste String? @db.ObjectId
+  dentiste Dentiste? @relation(fields: [id_dentiste], references: [id_dentiste], onUpdate: Cascade, onDelete: Cascade)
+
+  // Une consultation appartient à un patient
+  id_patient String? @db.ObjectId
+  patient Patient? @relation(fields: [id_patient], references: [id_patient], onUpdate: Cascade, onDelete: Cascade)
+}
+
 model Planification {
   id_planification  String @id @default(auto()) @map("_id") @db.ObjectId
   date_service DateTime
@@ -28,6 +43,7 @@ model Dentiste {
   prenom_dentiste String
   telephone String @unique
   email String @unique
+  numIns   String @unique
 
   // Un dentiste s'occupe d'une ou plusieurs consultations
   consultations Consultation[]
@@ -36,8 +52,7 @@ model Dentiste {
   planifications Planification[]
 
   // Un dentiste peut avoir un seul compte
-  id_compte String? @db.ObjectId @unique
-  compte Compte? @relation(fields: [id_compte], references: [id_compte])
+  compte Compte? 
 }
 
 model Patient {
@@ -58,13 +73,14 @@ model Patient {
 
 model Compte {
   id_compte  String @id @default(auto()) @map("_id") @db.ObjectId
-  nom_utilisateur String @unique
+  username String @unique
   email String @unique
   clerkId String? @unique
   role Role? @default(PATIENT)
 
   // Un compte appartient à un dentiste
-  dentiste Dentiste? 
+   numIns String? @unique
+  dentiste Dentiste? @relation(fields: [numIns], references: [numIns])
   
   // Un compte appartient à un patient
   patient Patient? 
@@ -102,17 +118,4 @@ model Notification {
   compte Compte? @relation(fields: [id_compte], references: [id_compte], onUpdate: Cascade, onDelete: Cascade)
 }
 
-model Consultation {
-  id_consultation  String @id @default(auto()) @map("_id") @db.ObjectId  
-  date_consultation DateTime
-  motif String
-  status String
 
-  // Une consultation appartient à un dentiste
-  id_dentiste String? @db.ObjectId
-  dentiste Dentiste? @relation(fields: [id_dentiste], references: [id_dentiste], onUpdate: Cascade, onDelete: Cascade)
-
-  // Une consultation appartient à un patient
-  id_patient String? @db.ObjectId
-  patient Patient? @relation(fields: [id_patient], references: [id_patient], onUpdate: Cascade, onDelete: Cascade)
-}

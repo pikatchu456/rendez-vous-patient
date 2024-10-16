@@ -13,8 +13,8 @@ const consultation_router = Router();
 consultation_router.get("/", getConsultation).post("/", createConsultation);
 
 consultation_router
-  .get("/:id", getConsultationById)
-  .put("/:id", updateConsultation)
-  .delete("/:id", deleteConsultation);
+  .get("/:id_consultation", getConsultationById)
+  .put("/:id_consultation", updateConsultation)
+  .delete("/:id_consultation", deleteConsultation);
 
 export default consultation_router;

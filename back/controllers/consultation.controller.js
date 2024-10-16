@@ -9,10 +9,10 @@ const getConsultation = asyncHandler(async (req, res, next) => {
 
 // Récupérer une consultation par ID
 const getConsultationById = asyncHandler(async (req, res, next) => {
-  const id = req.params.id;
+  const id_consultation = req.params.id_consultation;
   const result = await db.consultation.findUnique({
     where: {
-      id_consultation: id,
+      id_consultation: id_consultation,
     },
   });
   if (!result) {
@@ -40,12 +40,12 @@ const createConsultation = asyncHandler(async (req, res, next) => {
 
 // Mettre à jour une consultation existante
 const updateConsultation = asyncHandler(async (req, res, next) => {
-  const id = req.params.id;
+  const id_consultation = req.params.id_consultation;
   const body = req.body;
 
   const result = await db.consultation.update({
     where: {
-      id_consultation: id,
+      id_consultation: id_consultation,
     },
     data: {
       ...body,
@@ -60,11 +60,11 @@ const updateConsultation = asyncHandler(async (req, res, next) => {
 
 // Supprimer une consultation
 const deleteConsultation = asyncHandler(async (req, res, next) => {
-  const id = req.params.id;
+  const id_consultation = req.params.id_consultation;
 
   const result = await db.consultation.delete({
     where: {
-      id_consultation: id,
+      id_consultation: id_consultation,
     },
   });
 

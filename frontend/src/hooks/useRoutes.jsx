@@ -44,7 +44,7 @@ export const useRoutes = () => {
     {
       title: "Planification",
       icon: GoCalendar, // Remplacez par une icône appropriée si nécessaire
-      path: "/planification",
+      path: "/planification1",
       active: location === "/planification",
     },
     {
@@ -56,7 +56,7 @@ export const useRoutes = () => {
     {
       title: "Consultation",
       icon: GoTasklist, // Remplacez par une icône appropriée si nécessaire
-      path: "/consultation",
+      path: "/consultation1",
       active: location === "/consultation",
     },
   ]);

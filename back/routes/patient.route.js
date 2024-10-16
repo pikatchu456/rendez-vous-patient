@@ -19,8 +19,8 @@ patient_router.post(
 );
 
 patient_router
-  .get("/:id", getPatientById)
-  .put("/:id", updatePatient)
-  .delete("/:id", deletePatient);
+  .get("/:id_patient", getPatientById)
+  .put("/:id_patient", updatePatient)
+  .delete("/:id_patient", deletePatient);
 
 export default patient_router;

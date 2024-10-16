@@ -75,10 +75,29 @@ const deleteDentiste = asyncHandler(async (req, res, next) => {
   });
 });
 
+const checkCode = asyncHandler(async (req, res, next) => {
+  const {code} = req.body;
+
+  const dentiste = await db.dentiste.findUnique({
+    where: {
+      numIns: code,
+    },
+    include: { compte: true },
+  });
+  if(!dentiste) {
+    return res.status(404).json({message: "Aucun dentiste trouvée"});
+  };
+  if(dentiste.account) {
+    return res.status(400).json({message: "Ce dentiste a déja un compte"});
+  }
+    res.status(200).json({ success: true });
+})
+
 export {
   getDentiste,
   getDentisteById,
   createDentiste,
   updateDentiste,
   deleteDentiste,
+  checkCode
 };

@@ -54,10 +54,10 @@ const getCompteByClerkId = asyncHandler(async (req, res, next) => {
 });
 
 const deleteAnCompte = asyncHandler(async (req, res, next) => {
-  const id = req.params.id;
+  const id_compte = req.params.id_compte;
   const compte = await db.compte.delete({
     where: {
-      id_compte: id,
+      id_compte: id_compte,
     },
   });
   res.status(200).json({ message: "Compte supprimer avec succès", compte });
