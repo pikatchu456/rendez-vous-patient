@@ -1,4 +1,4 @@
-import apiSlice from "../apiSlice.jsx";
+import apiSlice from "../apiSlice";
 
 const compteApiSlice = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
@@ -12,4 +12,4 @@ const compteApiSlice = apiSlice.injectEndpoints({
   }),
 });
 
-export const { compteDentisteMutation } = compteApiSlice;
+export const { useCreateAccountMutation } = compteApiSlice;

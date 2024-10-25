@@ -44,12 +44,12 @@ const ConsultationAdmin = () => {
   const [selectedId, setSelectedId] = useState(null);
   const { loading, data, error, refetch } = useQuery("/api/consultation");
   return (
-    <main className="w-full h-screen bg-gray-50">
+    <main className="w-full h-screen dark:bg-slate-950 bg-gray-50">
       <div className="font-bold text-xl text-center py-6 animate-color-change"></div>
 
       <TableContainer>
-        <div className="flex p-3 items-center justify-between">
-          <p>Liste des Consultations</p>
+        <div className="dark:bg-slate-900 flex p-3 items-center justify-between">
+          <p className="dark:text-slate-100">Liste des Consultations</p>
           <button
             onClick={toggleAddModal}
             className="bg-gradient-to-r from-teal-400 to-yellow-200 text-lg py-2 px-8 rounded-md text-white flex item-center space-x-3"
@@ -85,7 +85,7 @@ const ConsultationAdmin = () => {
           data?.map((item) => (
             <TableRow
               key={item.id_consultation}
-              col="grid-cols-1 md:grid-cols-[1fr,1fr,1fr,max-content]"
+              col="dark:bg-slate-900 grid-cols-1 md:grid-cols-[1fr,1fr,1fr,max-content]"
             >
               <p>
                 {" "}
@@ -170,10 +170,10 @@ const AddModal = ({ open, setOpen, refetch }) => {
     <Modal open={open} setOpen={setOpen}>
       {show && (
         <>
-          <h1 className="text-center text-xl font-bold py-3 w-full">
+          <h1 className="dark:text-slate-100 dark:bg-slate-900 text-center text-xl font-bold py-3 w-full">
             Ajouter Consultation
           </h1>
-          <div className="p-3">
+          <div className="dark:bg-slate-900 p-3">
             <form onSubmit={handleSubmit(onSubmit)}>
               <Input
                 label="Date de Consultation"
@@ -307,10 +307,10 @@ const UpdateModal = ({
           </div>
         ) : (
           <>
-            <h1 className="text-center text-xl font-bold py-3 w-full">
+            <h1 className="dark:text-slate-100 dark:bg-slate-900 text-center text-xl font-bold py-3 w-full">
               Modifier Consultation
             </h1>
-            <div className="p-3">
+            <div className="dark:bg-slate-900 p-3">
               <form onSubmit={handleSubmit(onSubmit)}>
                 <Input
                   label="Date de Consultation"

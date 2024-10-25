@@ -6,7 +6,7 @@ const Input = ({ name, type, label, isError, errorMessage, state }) => {
     <div>
       <label
         htmlFor={name}
-        className="block text-sm font-semibold leading-6 text-gray-900"
+        className="dark:text-slate-100 block text-sm font-semibold leading-6 text-gray-900"
       >
         {label}
       </label>

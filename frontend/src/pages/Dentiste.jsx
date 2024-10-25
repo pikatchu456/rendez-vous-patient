@@ -40,14 +40,14 @@ const Dentiste = () => {
   const { loading, data, error, refetch } = useQuery("/api/dentiste");
 
   return (
-    <main className="w-full h-screen bg-gray-50">
+    <main className="w-full h-screen dark:bg-slate-950 bg-gray-50">
       <div className="font-bold text-xl text-center py-6 animate-color-change">
         Dentistes
       </div>
 
       <TableContainer>
-        <div className="flex p-3 items-center justify-between">
-          <p>Liste des Dentistes</p>
+        <div className="dark:bg-slate-900 flex p-3 items-center justify-between">
+          <p className="dark:text-slate-100">Liste des Dentistes</p>
           <button
             onClick={toggleAddModal}
             className="bg-gradient-to-r from-teal-400 to-yellow-200 text-lg py-2 px-8 rounded-md text-white flex item-center space-x-3"
@@ -57,13 +57,14 @@ const Dentiste = () => {
         </div>
         <TableRow
           bg=" bg-slate-950  text-white font-bold"
-          col="grid-cols-[1fr,1fr,1fr,1fr,max-content]"
+          col="grid-cols-[1fr,1fr,1fr,1fr,1fr,max-content]"
         >
           <p className="md:hidden">Informations</p>
           <p className="hidden md:block">Nom</p>
           <p className="hidden md:block">Prénom</p>
           <p className="hidden md:block">Téléphone</p>
           <p className="hidden md:block">Email</p>
+          <p className="hidden md:block">Numéro d'inscription</p>
           <p className="hidden md:block">Actions</p>
         </TableRow>
         {error && (
@@ -83,7 +84,7 @@ const Dentiste = () => {
           data?.map((item) => (
             <TableRow
               key={item.id_dentiste}
-              col="grid-cols-1 md:grid-cols-[1fr,1fr,1fr,1fr,max-content]"
+              col="dark:bg-slate-900 grid-cols-1 md:grid-cols-[1fr,1fr,1fr,1fr,1fr,max-content]"
             >
               <p>
                 {" "}
@@ -104,6 +105,13 @@ const Dentiste = () => {
                 {" "}
                 <span className="font-bold md:hidden">Email :</span>
                 {item.email}
+              </p>
+              <p>
+                {" "}
+                <span className="font-bold md:hidden">
+                  Numéro d'inscription :
+                </span>
+                {item.numIns}
               </p>
               <Actions
                 id_dentiste={item.id_dentiste}
@@ -172,10 +180,10 @@ const AddModal = ({ open, setOpen, refetch }) => {
     <Modal open={open} setOpen={setOpen}>
       {show && (
         <>
-          <h1 className="text-center text-xl font-bold py-3 w-full">
+          <h1 className="dark:text-slate-100 dark:bg-slate-900 text-center text-xl font-bold py-3 w-full">
             Ajouter Dentiste
           </h1>
-          <div className="p-3">
+          <div className="dark:bg-slate-900  p-3">
             <form onSubmit={handleSubmit(onSubmit)}>
               <Input
                 label="Nom"
@@ -204,6 +212,13 @@ const AddModal = ({ open, setOpen, refetch }) => {
                 errorMessage={errors?.email?.message}
                 state={{ ...register("email") }}
                 isError={errors?.email}
+              />
+              <Input
+                label="Numéro d'inscription"
+                type="text"
+                errorMessage={errors?.numIns?.message}
+                state={{ ...register("numIns") }}
+                isError={errors?.numIns}
               />
               <div className="flex mt-4 items-center justify-between">
                 <button
@@ -275,6 +290,7 @@ const UpdateModal = ({
       setValue("prenom_dentiste", data.prenom_dentiste);
       setValue("telephone", data.telephone);
       setValue("email", data.email);
+      setValue("numIns", data.numIns);
     }
   }, [data]);
 
@@ -284,6 +300,7 @@ const UpdateModal = ({
       setValue("prenom_dentiste", "");
       setValue("telephone", "");
       setValue("email", "");
+      setValue("numIns", "");
     }
   }, [open]);
 
@@ -313,10 +330,10 @@ const UpdateModal = ({
           </div>
         ) : (
           <>
-            <h1 className="text-center text-xl font-bold py-3 w-full">
+            <h1 className="dark:text-slate-100 dark:bg-slate-900 text-center text-xl font-bold py-3 w-full">
               Modifier Dentiste
             </h1>
-            <div className="p-3">
+            <div className="dark:bg-slate-900 p-3">
               <form onSubmit={handleSubmit(onSubmit)}>
                 <Input
                   label="Nom"

@@ -3,7 +3,11 @@ import asyncHandler from "express-async-handler";
 
 // Récupérer toutes les planifications
 const getPlanification = asyncHandler(async (req, res, next) => {
-  const result = await db.planification.findMany();
+  const result = await db.planification.findMany({
+    include: {
+      dentiste: true,
+    },
+  });
   res.status(200).json(result);
 });
 
@@ -30,6 +34,7 @@ const createPlanification = asyncHandler(async (req, res, next) => {
   const result = await db.planification.create({
     data: {
       ...body,
+      id_dentiste: body.id_dentiste,
     },
   });
 

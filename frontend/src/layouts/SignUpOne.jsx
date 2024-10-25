@@ -7,8 +7,8 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { useForm } from "react-hook-form";
 import { useCheckCodeMutation } from "../redux/slices/dentiste.api.slice.jsx";
 import { useSignUp } from "@clerk/clerk-react";
-import { compteDentisteMutation } from "../redux/slices/compte.api.slice.jsx";
 import { useNavigate } from "react-router-dom";
+import { useCreateAccountMutation } from "../redux/slices/compte.api.slice.jsx";
 
 const SignUpOne = () => {
   const { isLoaded, signUp, setActive } = useSignUp();
@@ -69,8 +69,8 @@ const SignUpOne = () => {
   const [pendingVerification, setPendingVerification] = useState(false);
   const [checkCode, { isLoading }] = useCheckCodeMutation();
 
-  const [createAccount] = compteDentisteMutation();
-
+  const [createAccount, { isLoading: isCreatingAccount }] =
+    useCreateAccountMutation();
   const onSubmit = async (data) => {
     try {
       const res = await checkCode(data).unwrap();
@@ -135,7 +135,7 @@ const SignUpOne = () => {
           if (completeSignUp.status === "complete") {
             console.log("COMPLETE SIGN UP");
             await setActive({ session: completeSignUp.createdSessionId });
-            navigate("/");
+            navigate("/consultation1");
           }
         })
         .catch((err) => {});
@@ -150,7 +150,7 @@ const SignUpOne = () => {
       {/* Section du formulaire à gauche */}
       <div className="flex justify-center items-center flex-col sm:px-8">
         <h1 className="text-center font-bold text-2xl py-6 px-8">
-          Sign up to create an account
+          Sign up to create an account Dentist
         </h1>
         <h1 className="text-center mb-8">Enter your code</h1>
         {!isCorrectCode && (

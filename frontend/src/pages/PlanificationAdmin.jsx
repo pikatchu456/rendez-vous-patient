@@ -17,6 +17,8 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import useMutation from "../hooks/useMutation";
 import Success from "../components/Success/Success";
 import { HiOutlinePencil, HiOutlineTrash } from "react-icons/hi2";
+import Dentiste from "./Dentiste";
+import SelectDentiste from "../components/SelectDentiste";
 
 const schema = yup.object().shape({
   date_service: yup
@@ -33,6 +35,7 @@ const schema = yup.object().shape({
     .string()
     .required("Veuillez entrer les heures de fin")
     .matches(/^\d{2}:\d{2}$/, "Le format doit être HH:mm (par exemple, 15:00)"),
+  id_dentiste: yup.string().required("Veuillez sélectionner un dentiste"),
 });
 
 const PlanificationAdmin = () => {
@@ -46,14 +49,14 @@ const PlanificationAdmin = () => {
   const { loading, data, error, refetch } = useQuery("/api/planification");
 
   return (
-    <main className="w-full h-screen bg-gray-50">
+    <main className="w-full h-screen dark:bg-slate-950 bg-gray-50">
       <div className="font-bold text-xl text-center py-6 animate-color-change">
         Planifications
       </div>
 
       <TableContainer>
-        <div className="flex p-3 items-center justify-between">
-          <p>Liste des Planifications</p>
+        <div className="dark:bg-slate-900 flex p-3 items-center justify-between">
+          <p className="dark:text-slate-100">Liste des Planifications</p>
           <button
             onClick={toggleAddModal}
             className="bg-gradient-to-r from-teal-400 to-yellow-200 text-lg py-2 px-8 rounded-md text-white flex item-center space-x-3"
@@ -64,12 +67,13 @@ const PlanificationAdmin = () => {
         </div>
         <TableRow
           bg=" bg-slate-950  text-white font-bold"
-          col="grid-cols-[1fr,1fr,1fr,max-content]"
+          col="grid-cols-[1fr,1fr,1fr,1fr,max-content]"
         >
           <p className="md:hidden">Informations</p>
           <p className="hidden md:block">Date de service</p>
-          <p className="hidden md:block">Heure du début</p>
-          <p className="hidden md:block">Heure de fin</p>
+          <p className="hidden md:block">Heures début</p>
+          <p className="hidden md:block">Heures fin</p>
+          <p className="hidden md:block">Nom du dentiste</p>
           <p className="hidden md:block">Actions</p>
         </TableRow>
         {error && (
@@ -89,7 +93,7 @@ const PlanificationAdmin = () => {
           data?.map((item) => (
             <TableRow
               key={item.id_planification}
-              col="grid-cols-1 md:grid-cols-[1fr,1fr,1fr,max-content]"
+              col="dark:bg-slate-900 grid-cols-1 md:grid-cols-[1fr,1fr,1fr,1fr,max-content]"
             >
               <p>
                 {" "}
@@ -98,13 +102,17 @@ const PlanificationAdmin = () => {
               </p>
               <p>
                 {" "}
-                <span className="font-bold md:hidden">Heure du début :</span>
+                <span className="font-bold md:hidden">Heures début :</span>
                 {item.heures_debut}
               </p>
               <p>
                 {" "}
-                <span className="font-bold md:hidden">Heure de fin :</span>
+                <span className="font-bold md:hidden">Heures fin :</span>
                 {item.heures_fin}
+              </p>
+              <p>
+                <span className="font-bold md:hidden">Nom du dentiste :</span>
+                {`${item.dentiste?.prenom_dentiste} ${item.dentiste?.nom_dentiste}`}
               </p>
 
               <Actions
@@ -174,10 +182,10 @@ const AddModal = ({ open, setOpen, refetch }) => {
     <Modal open={open} setOpen={setOpen}>
       {show && (
         <>
-          <h1 className="text-center text-xl font-bold py-3 w-full">
+          <h1 className="dark:text-slate-100 dark:bg-slate-900 text-center text-xl font-bold py-3 w-full">
             Ajouter Planification
           </h1>
-          <div className="p-3">
+          <div className="dark:bg-slate-900 p-3">
             <form onSubmit={handleSubmit(onSubmit)}>
               <Input
                 label="Date de Service"
@@ -201,6 +209,14 @@ const AddModal = ({ open, setOpen, refetch }) => {
                 errorMessage={errors?.heures_fin?.message}
                 state={{ ...register("heures_fin") }}
                 isError={errors?.heures_fin}
+              />
+
+              <SelectDentiste
+                register={register}
+                errors={errors}
+                setValue={(value) => {
+                  register.onChange("id_dentiste")(value);
+                }}
               />
 
               <div className="flex mt-4 items-center justify-between">
@@ -269,9 +285,11 @@ const UpdateModal = ({
 
   useEffect(() => {
     if (data !== null) {
-      setValue("date_service", new Date(data.date_service));
+      setValue("date_service", data.date_service);
       setValue("heures_debut", data.heures_debut);
       setValue("heures_fin", data.heures_fin);
+      setValue("id_dentiste", data?.dentiste?.id ?? "");
+  
     }
   }, [data]);
 
@@ -280,6 +298,7 @@ const UpdateModal = ({
       setValue("date_service", new Date());
       setValue("heures_debut", "09:00"); // Heure par défaut
       setValue("heures_fin", "17:00"); // Heure par défaut
+      setValue("id_dentiste", "");
     }
   }, [open]);
 
@@ -309,10 +328,10 @@ const UpdateModal = ({
           </div>
         ) : (
           <>
-            <h1 className="text-center text-xl font-bold py-3 w-full">
+            <h1 className="dark:text-slate-100 dark:bg-slate-900 text-center text-xl font-bold py-3 w-full">
               Modifier Planification
             </h1>
-            <div className="p-3">
+            <div className="dark:bg-slate-900 p-3">
               <form onSubmit={handleSubmit(onSubmit)}>
                 <Input
                   label="Date de Service"
@@ -336,6 +355,14 @@ const UpdateModal = ({
                   errorMessage={errors?.heures_fin?.message}
                   state={{ ...register("heures_fin") }}
                   isError={errors?.heures_fin}
+                />
+
+                <SelectDentiste
+                  register={register}
+                  errors={errors}
+                  setValue={(value) => {
+                    setValue("id_dentiste", value);
+                  }}
                 />
 
                 <div className="flex mt-4 items-center justify-between">
