@@ -1,0 +1,262 @@
+import React, { useState } from "react";
+import { useSignUp } from "@clerk/clerk-react";
+import { useNavigate, Link } from "react-router-dom";
+import { useForm } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
+import * as yup from "yup";
+import { useCreateAccountMutation } from "../redux/slices/compte.api.slice";
+
+const SignUp = () => {
+  const { isLoaded, signUp, setActive } = useSignUp();
+  const navigate = useNavigate();
+  const [createAccount] = useCreateAccountMutation();
+  const [isPending, setIsPending] = useState(false);
+
+  // Schéma de validation
+  const schema = yup.object().shape({
+    email: yup
+      .string()
+      .email("Entrez un email valide")
+      .required("L'email est requis"),
+    username: yup
+      .string()
+      .min(3, "Le nom d'utilisateur doit contenir au moins 3 caractères")
+      .matches(
+        /^[a-zA-Z0-9_-]+$/,
+        "Le nom d'utilisateur ne peut contenir que des lettres, chiffres, - et _"
+      )
+      .required("Le nom d'utilisateur est requis"),
+    password: yup
+      .string()
+      .min(8, "Le mot de passe doit contenir au moins 8 caractères")
+      .matches(
+        /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)/,
+        "Le mot de passe doit contenir au moins une majuscule, une minuscule et un chiffre"
+      )
+      .required("Le mot de passe est requis"),
+    confirmPassword: yup
+      .string()
+      .oneOf(
+        [yup.ref("password"), null],
+        "Les mots de passe doivent correspondre"
+      )
+      .required("Veuillez confirmer votre mot de passe"),
+  });
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    setError,
+    clearErrors,
+  } = useForm({
+    resolver: yupResolver(schema),
+  });
+
+  const handleClerkError = (error) => {
+    if (error.errors?.[0]) {
+      const { code, message } = error.errors[0];
+
+      switch (code) {
+        case "form_identifier_exists":
+          setError("email", { message: "Cet email est déjà enregistré" });
+          break;
+        case "form_username_exists":
+          setError("username", {
+            message: "Ce nom d'utilisateur est déjà pris",
+          });
+          break;
+        case "form_password_weak":
+          setError("password", {
+            message: "Le mot de passe est trop faible",
+          });
+          break;
+        default:
+          setError("email", {
+            message: message || "Erreur lors de la création du compte",
+          });
+      }
+    }
+  };
+
+  const onSubmit = async (data) => {
+    if (!isLoaded) return;
+
+    setIsPending(true);
+    clearErrors();
+    let clerkUser = null;
+
+    try {
+      // 1. Création du compte Clerk
+      const clerkResponse = await signUp.create({
+        emailAddress: data.email,
+        username: data.username,
+        password: data.password,
+      });
+
+      clerkUser = clerkResponse;
+
+      if (!clerkResponse?.createdUserId) {
+        throw new Error("Échec de la création du compte Clerk");
+      }
+
+      // 2. Création du compte dans la base de données
+      await createAccount({
+        email: data.email,
+        username: data.username,
+        clerkId: clerkResponse.createdUserId,
+        role: "PATIENT", // ou autre rôle selon le contexte
+      }).unwrap();
+
+      // 3. Activation de la session
+      await setActive({ session: clerkResponse.createdSessionId });
+
+      // 4. Redirection vers la page d'accueil
+      navigate("/");
+    } catch (error) {
+      if (error.name === "ClerkError") {
+        handleClerkError(error);
+      } else {
+        // Erreur lors de la création dans la base de données
+        setError("email", {
+          message: "Erreur lors de la création du compte. Veuillez réessayer.",
+        });
+
+        // TODO: Si possible, supprimer l'utilisateur Clerk créé
+        // if (clerkUser?.createdUserId) {
+        //   await deleteClerkUser(clerkUser.createdUserId);
+        // }
+      }
+    } finally {
+      setIsPending(false);
+    }
+  };
+
+  if (!isLoaded) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-sky-500" />
+      </div>
+    );
+  }
+
+  return (
+    <main className="w-full h-screen grid grid-cols-1 sm:grid-cols-2">
+      <div className="flex justify-center items-center flex-col sm:px-8">
+        <h1 className="text-center font-bold text-2xl py-6 px-8">
+          Créer un compte
+        </h1>
+
+        {!isPending && (
+          <form
+            onSubmit={handleSubmit(onSubmit)}
+            className="w-full px-8 flex flex-col space-y-4"
+          >
+            <div>
+              <input
+                {...register("email")}
+                type="email"
+                placeholder="Email"
+                className={`w-full p-2 border rounded-md ${
+                  errors.email ? "border-red-500" : "border-gray-300"
+                }`}
+              />
+              {errors.email && (
+                <p className="text-red-500 text-sm mt-1">
+                  {errors.email.message}
+                </p>
+              )}
+            </div>
+
+            <div>
+              <input
+                {...register("username")}
+                type="text"
+                placeholder="Nom d'utilisateur"
+                className={`w-full p-2 border rounded-md ${
+                  errors.username ? "border-red-500" : "border-gray-300"
+                }`}
+              />
+              {errors.username && (
+                <p className="text-red-500 text-sm mt-1">
+                  {errors.username.message}
+                </p>
+              )}
+            </div>
+
+            <div>
+              <input
+                {...register("password")}
+                type="password"
+                placeholder="Mot de passe"
+                className={`w-full p-2 border rounded-md ${
+                  errors.password ? "border-red-500" : "border-gray-300"
+                }`}
+              />
+              {errors.password && (
+                <p className="text-red-500 text-sm mt-1">
+                  {errors.password.message}
+                </p>
+              )}
+            </div>
+
+            <div>
+              <input
+                {...register("confirmPassword")}
+                type="password"
+                placeholder="Confirmer le mot de passe"
+                className={`w-full p-2 border rounded-md ${
+                  errors.confirmPassword ? "border-red-500" : "border-gray-300"
+                }`}
+              />
+              {errors.confirmPassword && (
+                <p className="text-red-500 text-sm mt-1">
+                  {errors.confirmPassword.message}
+                </p>
+              )}
+            </div>
+
+            <button
+              type="submit"
+              disabled={isPending}
+              className="w-full bg-sky-500 text-white py-2 rounded-md hover:bg-sky-600 
+                       disabled:bg-sky-300 disabled:cursor-not-allowed transition-colors"
+            >
+              {isPending ? "Création en cours..." : "S'inscrire"}
+            </button>
+          </form>
+        )}
+
+        {isPending && (
+          <div className="mt-4 text-center text-gray-600">
+            Création de votre compte en cours...
+          </div>
+        )}
+
+        <p className="my-4">
+          Déjà un compte?{" "}
+          <Link to="/" className="text-sky-500 hover:underline">
+            Se connecter
+          </Link>
+        </p>
+
+        <p className="my-4">
+          Vous êtes dentiste?{" "}
+          <Link to="/signup/dentist" className="text-sky-500 hover:underline">
+            S'inscrire en tant que dentiste
+          </Link>
+        </p>
+      </div>
+
+      <div className="hidden sm:block">
+        <img
+          src="/photo/Capture2.PNG"
+          alt="dentiste"
+          className="w-full h-full object-cover"
+        />
+      </div>
+    </main>
+  );
+};
+
+export default SignUp;

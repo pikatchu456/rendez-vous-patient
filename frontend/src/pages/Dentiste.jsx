@@ -38,6 +38,8 @@ const Dentiste = () => {
   const toggleDeleteModal = () => setDeleteModal(!deleteModal);
   const [selectedId, setSelectedId] = useState(null);
   const { loading, data, error, refetch } = useQuery("/api/dentiste");
+  /*paginations */
+  
 
   return (
     <main className="w-full h-screen dark:bg-slate-950 bg-gray-50">

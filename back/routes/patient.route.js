@@ -6,17 +6,15 @@ import {
   createPatient,
   updatePatient,
   deletePatient,
-  createAccount
+  createAccount,
+  checkCode
 } from "../controllers/patient.controller.js";
 
 const patient_router = Router();
 
 patient_router.get("/", getPatient).post("/", createPatient);
 
-patient_router.post(
-  "/checkCode",
-  createAccount
-);
+patient_router.post("/code", checkCode);
 
 patient_router
   .get("/:id_patient", getPatientById)

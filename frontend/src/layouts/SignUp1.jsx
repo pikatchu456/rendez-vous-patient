@@ -9,7 +9,7 @@ import { useSignUp } from "@clerk/clerk-react";
 import { useNavigate } from "react-router-dom";
 import { useCreateAccountMutation } from "../redux/slices/compte_patient.api.slice.jsx";
 
-const SignUp = () => {
+const SignUp1 = () => {
   const { isLoaded, signUp, setActive } = useSignUp();
   const navigate = useNavigate();
   const [pendingVerification, setPendingVerification] = useState(false);
@@ -216,4 +216,4 @@ const SignUp = () => {
   );
 };
 
-export default SignUp;
+export default SignUp1;

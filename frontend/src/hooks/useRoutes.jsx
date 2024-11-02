@@ -26,8 +26,8 @@ export const useRoutes = () => {
     {
       title: "Dashboard",
       icon: GoHome,
-      path: "/",
-      active: location === "/",
+      path: "/dashboard",
+      active: location === "/dashboard",
     },
     {
       title: "Dentiste",
@@ -45,7 +45,7 @@ export const useRoutes = () => {
       title: "Planification",
       icon: GoCalendar, // Remplacez par une icône appropriée si nécessaire
       path: "/planification1",
-      active: location === "/planification",
+      active: location === "/planification1",
     },
     {
       title: "Message",
@@ -57,7 +57,7 @@ export const useRoutes = () => {
       title: "Consultation",
       icon: GoTasklist, // Remplacez par une icône appropriée si nécessaire
       path: "/consultation1",
-      active: location === "/consultation",
+      active: location === "/consultation1",
     },
   ]);
 
