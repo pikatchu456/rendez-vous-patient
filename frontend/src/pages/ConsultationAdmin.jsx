@@ -264,10 +264,16 @@ const UpdateModal = ({
     `/api/consultation/${id_consultation}`,
     open ? false : true
   );
+ 
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    return date.toISOString().split("T")[0];
+  };
 
+  
   useEffect(() => {
     if (data !== null) {
-      setValue("date_consultation", data.date_consultation);
+      setValue("date_consultation", formatDate(data.date_consultation));
       setValue("motif", data.motif);
       setValue("status", data.status);
     }
@@ -279,7 +285,7 @@ const UpdateModal = ({
       setValue("motif", "");
       setValue("status", "");
     }
-  }, [open]);
+  }, [open, setValue]);
 
   const [show, setShow] = useState(true);
 
@@ -296,7 +302,7 @@ const UpdateModal = ({
         setShow(true);
       }, 2000);
     }
-  }, [success]);
+  }, [setOpen, success]);
 
   return (
     <Modal open={open} setOpen={setOpen}>

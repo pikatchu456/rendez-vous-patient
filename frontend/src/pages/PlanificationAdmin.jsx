@@ -283,9 +283,15 @@ const UpdateModal = ({
     open ? false : true
   );
 
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    return date.toISOString().split("T")[0];
+  };
+
+
   useEffect(() => {
     if (data !== null) {
-      setValue("date_service", data.date_service);
+      setValue("date_service", formatDate(data.date_service));
       setValue("heures_debut", data.heures_debut);
       setValue("heures_fin", data.heures_fin);
       setValue("id_dentiste", data?.dentiste?.id ?? "");
