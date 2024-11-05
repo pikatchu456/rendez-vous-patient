@@ -8,7 +8,7 @@ const Sidebar = () => {
   return (
     <div className="sidebar bg-gray-100 duration-300 ease-in-out dark:bg-slate-900  px-8  bottom-0 fixed w-full md:w-[250px] h-16 md:h-screen md:col-[1]">
       <div className="text-xl dark:text-slate-100 hidden md:block font-semibold mt-8 ">
-        Fintrade
+        RENDEZ-VOUS
       </div>
       <div className="flex md:flex-col items-center pt-2 justify-between md:justify-normal md:items-start space-y-1  md:mt-8">
         {routes.map((item) => (

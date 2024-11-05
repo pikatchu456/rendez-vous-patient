@@ -1,8 +1,8 @@
 import apiSlice from "../apiSlice";
 
-const compteApiSlice = apiSlice.injectEndpoints({
+const comptePatientSlice = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
-    createAccount: builder.mutation({
+    createAccountPatient: builder.mutation({
       query: (data) => ({
         url: `/api/compte/patient`,
         method: "POST",
@@ -12,4 +12,4 @@ const compteApiSlice = apiSlice.injectEndpoints({
   }),
 });
 
-export const { useCreateAccountMutation } = compteApiSlice;
+export const { useCreateAccountPatientMutation } = comptePatientSlice;

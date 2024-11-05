@@ -114,7 +114,7 @@ const SignUp1 = () => {
       await setActive({ session: completeSignUp.createdSessionId });
 
       // Redirect to home
-      navigate("/");
+      navigate("/dashboard");
     } catch (err) {
       const error = err.errors?.[0];
       if (error) {

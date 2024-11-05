@@ -34,6 +34,11 @@ const schema = yup.object().shape({
     ),
 });
 
+ const formatDate = (dateString) => {
+   const date = new Date(dateString);
+   return date.toLocaleDateString();
+ };
+
 const ConsultationAdmin = () => {
   const [addModal, setAddModal] = useState(false);
   const toggleAddModal = () => setAddModal(!addModal);
@@ -90,7 +95,7 @@ const ConsultationAdmin = () => {
               <p>
                 {" "}
                 <span className="font-bold md:hidden">Date :</span>
-                {item.date_consultation}
+                {formatDate(item.date_consultation)}
               </p>
               <p>
                 {" "}

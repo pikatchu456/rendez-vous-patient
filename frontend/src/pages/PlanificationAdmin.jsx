@@ -48,6 +48,11 @@ const PlanificationAdmin = () => {
   const [selectedId, setSelectedId] = useState(null);
   const { loading, data, error, refetch } = useQuery("/api/planification");
 
+   const formatDate = (dateString) => {
+     const date = new Date(dateString);
+     return date.toLocaleDateString();
+   };
+
   return (
     <main className="w-full h-screen dark:bg-slate-950 bg-gray-50">
       <div className="font-bold text-xl text-center py-6 animate-color-change">
@@ -98,7 +103,7 @@ const PlanificationAdmin = () => {
               <p>
                 {" "}
                 <span className="font-bold md:hidden">Date de service :</span>
-                {item.date_service}
+                {formatDate(item.date_service)}
               </p>
               <p>
                 {" "}
