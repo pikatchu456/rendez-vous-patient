@@ -19,6 +19,7 @@ import Loader from "./components/Loader/Loader.jsx";
 import SignUp from "./layouts/SignUp.jsx";
 import ConsultationAdmin from "./pages/ConsultationAdmin.jsx";
 import PlanificationAdmin from "./pages/PlanificationAdmin.jsx";
+import DashboardPatient from "./pages/DashboardPatient.jsx";
 
 const App = () => {
   return (
@@ -31,6 +32,7 @@ const App = () => {
           <Routes>
             <Route path="/" element={<AdminLayout />}>
               <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/dashboard1" element={<DashboardPatient />} />
               <Route path="/message" element={<Message />} />
               <Route path="/dentiste" element={<Dentiste />} />
               <Route path="/patient" element={<Patient />} />

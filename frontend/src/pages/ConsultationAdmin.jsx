@@ -42,6 +42,7 @@ const formatDate = (dateString) => {
 };
 
 const ConsultationAdmin = () => {
+  const userRole = localStorage.getItem("userRole")?.toUpperCase();
   const [addModal, setAddModal] = useState(false);
   const toggleAddModal = () => setAddModal(!addModal);
   const [updateModal, setUpdateModal] = useState(false);
@@ -50,6 +51,8 @@ const ConsultationAdmin = () => {
   const toggleDeleteModal = () => setDeleteModal(!deleteModal);
   const [selectedId, setSelectedId] = useState(null);
   const { loading, data, error, refetch } = useQuery("/api/consultation");
+
+  const isPatient = userRole === "PATIENT";
 
   /*paginations */
   const [currentPage, setCurrentPage] = useState(1);
@@ -92,7 +95,7 @@ const ConsultationAdmin = () => {
           <p className="hidden md:block">Motif</p>
           <p className="hidden md:block">Status</p>
           <p className="hidden md:block">Nom du Patient</p>
-          <p className="hidden md:block">Actions</p>
+          {!isPatient && <p className="hidden md:block">Actions</p>}
         </TableRow>
         {error && (
           <div className="w-full h-80 flex items-center justify-center">
@@ -111,7 +114,9 @@ const ConsultationAdmin = () => {
           currentItems?.map((item) => (
             <TableRow
               key={item.id_consultation}
-              col="dark:bg-slate-900 grid-cols-1 md:grid-cols-[1fr,1fr,1fr,1fr,max-content]"
+              col={`dark:bg-slate-900 grid-cols-1 md:grid-cols-[1fr,1fr,1fr,1fr${
+                userRole !== "patient" ? ",max-content" : ""
+              }]`}
             >
               <p>
                 {" "}
@@ -134,12 +139,14 @@ const ConsultationAdmin = () => {
                 {`${item.patient?.prenom_patient} ${item.patient?.nom_patient}`}
               </p>
 
-              <Actions
-                id_consultation={item.id_consultation}
-                setSelectedId={setSelectedId}
-                toggleUpdateModal={toggleUpdateModal}
-                toggleDeleteModal={toggleDeleteModal}
-              />
+              {!isPatient && (
+                <Actions
+                  id_consultation={item.id_consultation}
+                  setSelectedId={setSelectedId}
+                  toggleUpdateModal={toggleUpdateModal}
+                  toggleDeleteModal={toggleDeleteModal}
+                />
+              )}
             </TableRow>
           ))
         )}
@@ -179,20 +186,25 @@ const ConsultationAdmin = () => {
       </div>
 
       <AddModal refetch={refetch} open={addModal} setOpen={setAddModal} />
-      <DeleteModal
-        refetch={refetch}
-        open={deleteModal}
-        setOpen={setDeleteModal}
-        id_consultation={selectedId}
-        setSelectedId={setSelectedId}
-      />
-      <UpdateModal
-        refetch={refetch}
-        open={updateModal}
-        setOpen={setUpdateModal}
-        id_consultation={selectedId}
-        setSelectedId={setSelectedId}
-      />
+
+      {!isPatient && (
+        <>
+          <DeleteModal
+            refetch={refetch}
+            open={deleteModal}
+            setOpen={setDeleteModal}
+            id_consultation={selectedId}
+            setSelectedId={setSelectedId}
+          />
+          <UpdateModal
+            refetch={refetch}
+            open={updateModal}
+            setOpen={setUpdateModal}
+            id_consultation={selectedId}
+            setSelectedId={setSelectedId}
+          />
+        </>
+      )}
     </main>
   );
 };
