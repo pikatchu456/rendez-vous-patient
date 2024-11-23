@@ -37,9 +37,25 @@ const Dentiste = () => {
   const [deleteModal, setDeleteModal] = useState(false);
   const toggleDeleteModal = () => setDeleteModal(!deleteModal);
   const [selectedId, setSelectedId] = useState(null);
+  
   const { loading, data, error, refetch } = useQuery("/api/dentiste");
   /*paginations */
-  
+   const [currentPage, setCurrentPage] = useState(1);
+   const itemsPerPage = 3;
+
+   // Calculate pagination values
+   const totalPages = data ? Math.ceil(data.length / itemsPerPage) : 0;
+   const indexOfLastItem = currentPage * itemsPerPage;
+   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+   const currentItems = data
+     ? data.slice(indexOfFirstItem, indexOfLastItem)
+     : [];
+
+   // Handle page changes
+   const handlePageChange = (pageNumber) => {
+     setCurrentPage(pageNumber);
+   };
+
 
   return (
     <main className="w-full h-screen dark:bg-slate-950 bg-gray-50">
@@ -81,9 +97,19 @@ const Dentiste = () => {
           <div className="w-full h-80 flex items-center justify-center">
             <Loader />
           </div>
+        ) : error ? (
+          <div className="w-full h-80 flex items-center justify-center">
+            <h1 className="text-4xl font-semibold text-rose-500">
+              Il y a une erreur quelque part
+            </h1>
+          </div>
+        ) : !data || data.length === 0 ? (
+          <div className="w-full h-80 flex items-center justify-center">
+            <h1 className="text-4xl font-semibold">Aucun dentiste trouvé</h1>
+          </div>
         ) : (
           !error &&
-          data?.map((item) => (
+          currentItems?.map((item) => (
             <TableRow
               key={item.id_dentiste}
               col="dark:bg-slate-900 grid-cols-1 md:grid-cols-[1fr,1fr,1fr,1fr,1fr,max-content]"
@@ -125,6 +151,38 @@ const Dentiste = () => {
           ))
         )}
       </TableContainer>
+      {/* Pagination */}
+      <div className="flex flex-wrap justify-center items-center space-x-2 p-4">
+        <button
+          onClick={() => handlePageChange(currentPage - 1)}
+          disabled={currentPage === 1}
+          className="px-3 py-1 rounded bg-blue-500 text-white disabled:bg-blue-300"
+        >
+          Précédent
+        </button>
+
+        {[...Array(totalPages)].map((_, index) => (
+          <button
+            key={index + 1}
+            onClick={() => handlePageChange(index + 1)}
+            className={`px-3 py-1 rounded ${
+              currentPage === index + 1
+                ? "bg-blue-600 text-white"
+                : "bg-blue-100 text-blue-600 hover:bg-blue-200"
+            }`}
+          >
+            {index + 1}
+          </button>
+        ))}
+
+        <button
+          onClick={() => handlePageChange(currentPage + 1)}
+          disabled={currentPage === totalPages}
+          className="px-3 py-1 rounded bg-blue-500 text-white disabled:bg-blue-300"
+        >
+          Suivant
+        </button>
+      </div>
 
       <AddModal refetch={refetch} open={addModal} setOpen={setAddModal} />
       <DeleteModal
@@ -364,6 +422,13 @@ const UpdateModal = ({
                   errorMessage={errors?.email?.message}
                   state={{ ...register("email") }}
                   isError={errors?.email}
+                />
+                <Input
+                  label="Numéro d'inscription"
+                  type="text"
+                  errorMessage={errors?.numIns?.message}
+                  state={{ ...register("numIns") }}
+                  isError={errors?.numIns}
                 />
                 <div className="flex mt-4 items-center justify-between">
                   <button

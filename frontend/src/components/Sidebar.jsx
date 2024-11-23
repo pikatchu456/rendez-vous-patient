@@ -4,7 +4,6 @@ import { useRoutes } from "../hooks/useRoutes.jsx";
 const Sidebar = () => {
   const routes = useRoutes();
 
-  console.log(routes);
   return (
     <div className="sidebar bg-gray-100 duration-300 ease-in-out dark:bg-slate-900  px-8  bottom-0 fixed w-full md:w-[250px] h-16 md:h-screen md:col-[1]">
       <div className="text-xl dark:text-slate-100 hidden md:block font-semibold mt-8 ">

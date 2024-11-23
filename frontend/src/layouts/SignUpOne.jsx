@@ -110,38 +110,21 @@ const SignUpOne = () => {
 
   const onSubmitValidation = async (data) => {
     try {
-      const completeSignUp = await signUp
-        .attemptEmailAddressVerification({
-          code: data.code,
-        })
-        .then(async (res) => {
-          const clerkId = res.createdUserId;
-          const addCompte = await createAccount({
-            clerkId,
-            email: getValuesSignUp("email"),
-            username: getValuesSignUp("username"),
-            numIns: getValues("code"),
-          }).unwrap();
+      await signUp.attemptEmailAddressVerification({ code: data.code });
+      const clerkId = signUp.createdUserId;
+      await createAccount({
+        clerkId,
+        email: getValuesSignUp("email"),
+        username: getValuesSignUp("username"),
+        numIns: getValues("code"),
+      }).unwrap();
 
-          window.location.reload();
-
-          console.log("OK COMPLETE SIGN_UP");
-
-          if (completeSignUp.status !== "complete") {
-            /*  investigate the response, to see if there was an error
-           or if the user needs to complete more steps.*/
-            console.log(JSON.stringify(completeSignUp, null, 2));
-          }
-          if (completeSignUp.status === "complete") {
-            console.log("COMPLETE SIGN UP");
-            await setActive({ session: completeSignUp.createdSessionId });
-            navigate("/consultation1");
-          }
-        })
-        .catch((err) => {});
+      navigate("/consultation1");
+      window.location.reload();
     } catch (err) {
-      const error = err.errors[0];
-      setErrorsValidation("code", { message: error.message });
+      setError("code", {
+        message: err.errors?.[0]?.message || "Error occurred",
+      });
     }
   };
 
@@ -152,7 +135,7 @@ const SignUpOne = () => {
         <h1 className="text-center font-bold text-2xl py-6 px-8">
           Sign up to create an account Dentist
         </h1>
-        <h1 className="text-center mb-8">Enter your code</h1>
+        <h1 className="text-center mb-8">Enter your Num d'inscription</h1>
         {!isCorrectCode && (
           <form
             onSubmit={handleSubmit(onSubmit)}
@@ -164,12 +147,14 @@ const SignUpOne = () => {
               errorMessage={errors?.code?.message}
               name="numIns"
               type="text"
-              label="Register number"
+              label="Numéro d'inscription"
             />
 
             <Button type="submit">
               {" "}
-              {isLoading ? "Checking code ..." : "Check Code"}
+              {isLoading
+                ? "Checking num d'inscription ..."
+                : "Check num d'inscription"}
             </Button>
           </form>
         )}
@@ -227,10 +212,10 @@ const SignUpOne = () => {
               isError={errorsValidation?.code}
               name="code"
               type="text"
-              label="Register number"
+              label="Register number an Email"
             />
 
-            <Button>Check code</Button>
+            <Button>{isLoading ? "Checking code ..." : "Check code"}</Button>
           </form>
         )}
         <p className="my-4">

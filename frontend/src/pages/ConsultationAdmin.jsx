@@ -18,6 +18,8 @@ import useMutation from "../hooks/useMutation";
 import Success from "../components/Success/Success";
 import { HiOutlinePencil, HiOutlineTrash } from "react-icons/hi2";
 import Select from "../components/Select";
+import SelectPatient from "../components/SelectPatient";
+import { FaFilePdf } from "react-icons/fa";
 
 const schema = yup.object().shape({
   date_consultation: yup
@@ -34,10 +36,10 @@ const schema = yup.object().shape({
     ),
 });
 
- const formatDate = (dateString) => {
-   const date = new Date(dateString);
-   return date.toLocaleDateString();
- };
+const formatDate = (dateString) => {
+  const date = new Date(dateString);
+  return date.toLocaleDateString();
+};
 
 const ConsultationAdmin = () => {
   const [addModal, setAddModal] = useState(false);
@@ -48,6 +50,24 @@ const ConsultationAdmin = () => {
   const toggleDeleteModal = () => setDeleteModal(!deleteModal);
   const [selectedId, setSelectedId] = useState(null);
   const { loading, data, error, refetch } = useQuery("/api/consultation");
+
+  /*paginations */
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 3;
+
+  // Calculate pagination values
+  const totalPages = data ? Math.ceil(data.length / itemsPerPage) : 0;
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = data
+    ? data.slice(indexOfFirstItem, indexOfLastItem)
+    : [];
+
+  // Handle page changes
+  const handlePageChange = (pageNumber) => {
+    setCurrentPage(pageNumber);
+  };
+
   return (
     <main className="w-full h-screen dark:bg-slate-950 bg-gray-50">
       <div className="font-bold text-xl text-center py-6 animate-color-change"></div>
@@ -65,12 +85,13 @@ const ConsultationAdmin = () => {
         </div>
         <TableRow
           bg=" bg-slate-950  text-white font-bold"
-          col="grid-cols-[1fr,1fr,1fr,max-content]"
+          col="grid-cols-[1fr,1fr,1fr,1fr,max-content]"
         >
           <p className="md:hidden">Informations</p>
           <p className="hidden md:block">Date</p>
           <p className="hidden md:block">Motif</p>
           <p className="hidden md:block">Status</p>
+          <p className="hidden md:block">Nom du Patient</p>
           <p className="hidden md:block">Actions</p>
         </TableRow>
         {error && (
@@ -87,10 +108,10 @@ const ConsultationAdmin = () => {
           </div>
         ) : (
           !error &&
-          data?.map((item) => (
+          currentItems?.map((item) => (
             <TableRow
               key={item.id_consultation}
-              col="dark:bg-slate-900 grid-cols-1 md:grid-cols-[1fr,1fr,1fr,max-content]"
+              col="dark:bg-slate-900 grid-cols-1 md:grid-cols-[1fr,1fr,1fr,1fr,max-content]"
             >
               <p>
                 {" "}
@@ -107,6 +128,11 @@ const ConsultationAdmin = () => {
                 <span className="font-bold md:hidden">Status :</span>
                 {item.status}
               </p>
+              <p>
+                {" "}
+                <span className="font-bold md:hidden">Nom du patient :</span>
+                {`${item.patient?.prenom_patient} ${item.patient?.nom_patient}`}
+              </p>
 
               <Actions
                 id_consultation={item.id_consultation}
@@ -118,6 +144,39 @@ const ConsultationAdmin = () => {
           ))
         )}
       </TableContainer>
+
+      {/* Pagination */}
+      <div className="flex flex-wrap justify-center items-center space-x-2 p-4">
+        <button
+          onClick={() => handlePageChange(currentPage - 1)}
+          disabled={currentPage === 1}
+          className="px-3 py-1 rounded bg-blue-500 text-white disabled:bg-blue-300"
+        >
+          Précédent
+        </button>
+
+        {[...Array(totalPages)].map((_, index) => (
+          <button
+            key={index + 1}
+            onClick={() => handlePageChange(index + 1)}
+            className={`px-3 py-1 rounded ${
+              currentPage === index + 1
+                ? "bg-blue-600 text-white"
+                : "bg-blue-100 text-blue-600 hover:bg-blue-200"
+            }`}
+          >
+            {index + 1}
+          </button>
+        ))}
+
+        <button
+          onClick={() => handlePageChange(currentPage + 1)}
+          disabled={currentPage === totalPages}
+          className="px-3 py-1 rounded bg-blue-500 text-white disabled:bg-blue-300"
+        >
+          Suivant
+        </button>
+      </div>
 
       <AddModal refetch={refetch} open={addModal} setOpen={setAddModal} />
       <DeleteModal
@@ -206,6 +265,14 @@ const AddModal = ({ open, setOpen, refetch }) => {
                 isError={errors?.status}
               />
 
+              <SelectPatient
+                register={register}
+                errors={errors}
+                setValue={(value) => {
+                  register.onChange("id_patient")(value);
+                }}
+              />
+
               <div className="flex mt-4 items-center justify-between">
                 <button
                   type="submit"
@@ -269,18 +336,20 @@ const UpdateModal = ({
     `/api/consultation/${id_consultation}`,
     open ? false : true
   );
- 
+
   const formatDate = (dateString) => {
     const date = new Date(dateString);
     return date.toISOString().split("T")[0];
   };
 
-  
   useEffect(() => {
     if (data !== null) {
       setValue("date_consultation", formatDate(data.date_consultation));
       setValue("motif", data.motif);
       setValue("status", data.status);
+      if (data.patient) {
+        setValue("id_patient", data.patient.id_patient);
+      }
     }
   }, [data]);
 
@@ -289,6 +358,7 @@ const UpdateModal = ({
       setValue("date_consultation", "");
       setValue("motif", "");
       setValue("status", "");
+      setValue("id_patient", "");
     }
   }, [open, setValue]);
 
@@ -347,6 +417,13 @@ const UpdateModal = ({
                   errorMessage={errors?.status?.message}
                   state={{ ...register("status") }}
                   isError={errors?.status}
+                />
+
+                <SelectPatient
+                  register={register}
+                  errors={errors}
+                  setValue={setValue}
+                  defaultValue={data?.patient?.id_patient}
                 />
 
                 <div className="flex mt-4 items-center justify-between">
@@ -495,6 +572,27 @@ const Actions = ({
     toggleUpdateModal();
   };
 
+  const generatePDFWithId = async (id_consultation) => {
+    try {
+      const response = await fetch(`/api/pdf/${id_consultation}`);
+      const blob = await response.blob();
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = `consultation_${id_consultation}.pdf`;
+      link.click();
+    } catch (error) {
+      console.error("Error generating PDF:", error);
+    }
+  };
+
+  const generatePDF = async () => {
+    try {
+      await generatePDFWithId(id_consultation);
+    } catch (error) {
+      console.error("Error generating PDF:", error);
+    }
+  };
+
   return (
     <div className="flex space-x-2">
       <div className="flex items-center space-x-3">
@@ -505,6 +603,10 @@ const Actions = ({
         <HiOutlineTrash
           className="text-xl text-rose-500"
           onClick={deleteFunc}
+        />
+        <FaFilePdf
+          className="text-xl text-[#FF0000] cursor-pointer"
+          onClick={generatePDF}
         />
       </div>
     </div>

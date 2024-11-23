@@ -16,15 +16,16 @@ const SelectDentiste = ({ register, errors, setValue }) => {
   }, []);
 
   const handleChange = (event) => {
-    setValue(event.target.value);
+    setValue("id_dentiste", event.target.value);
   };
+
 
   return (
     <select {...register("id_dentiste")} onChange={handleChange}>
       <option value="">Sélectionnez un dentiste</option>
       {dentistes.map((dentiste) => (
         <option key={dentiste.id_dentiste} value={dentiste.id_dentiste}>
-          {dentiste.nom_dentiste} {dentiste.prenom_dentiste}
+          {dentiste.prenom_dentiste} {dentiste.nom_dentiste}
         </option>
       ))}
     </select>

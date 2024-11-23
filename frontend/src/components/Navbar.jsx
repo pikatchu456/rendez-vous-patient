@@ -2,9 +2,11 @@ import { useRoutes } from "../hooks/useRoutes.jsx";
 import { useLocation, useNavigate } from "react-router-dom";
 import { ThemeContext } from "../context/ThemeContext.jsx";
 import { GiMoon } from "react-icons/gi";
-import { useContext } from "react";
+import { useContext, useState } from "react";
 import { LuSun } from "react-icons/lu";
 import { useAuth } from "@clerk/clerk-react";
+import { UserButton } from "@clerk/clerk-react";
+import { BsBell } from "react-icons/bs";
 
 const Navbar = () => {
   const pathname = useLocation().pathname;
@@ -12,11 +14,7 @@ const Navbar = () => {
   const { theme, toggleTheme } = useContext(ThemeContext);
   const { signOut } = useAuth(); // Utiliser useAuth pour accéder à la fonction signOut
   const navigate = useNavigate(); // Pour rediriger après la déconnexion
-
-  const handleSignOut = async () => {
-    await signOut(); // Déconnexion de Clerk
-    navigate("/login"); // Redirection vers la page de login
-  };
+  const [notification, setNotification] = useState([])
 
   return (
     <div className="navbar dark:bg-slate-900 duration-300 ease-in-out dark:text-white fixed row-[1] h-[60px] md:pr-[250px] w-full flex items-center justify-between px-6 shadow ">
@@ -39,12 +37,15 @@ const Navbar = () => {
             <GiMoon className="text-2xl" />
           )}
         </div>
-        <button
-          onClick={handleSignOut}
-          className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md"
-        >
-          Se déconnecter
-        </button>
+        <div className="mr-3">
+          <BsBell
+            className={`text-2xl ${
+              theme === "light" ? "text-gray-800" : "text-white"
+            }`}
+          />
+        </div>
+        <UserButton />
+        
       </div>
     </div>
   );

@@ -3,7 +3,11 @@ import asyncHandler from "express-async-handler";
 
 // Récupérer toutes les consultations
 const getConsultation = asyncHandler(async (req, res, next) => {
-  const result = await db.consultation.findMany();
+  const result = await db.consultation.findMany({
+    include: {
+      patient: true, // Inclure les données du patient
+    },
+  });
   res.status(200).json(result);
 });
 
@@ -13,6 +17,9 @@ const getConsultationById = asyncHandler(async (req, res, next) => {
   const result = await db.consultation.findUnique({
     where: {
       id_consultation: id_consultation,
+    },
+    include: {
+      patient: true, // Inclure les données du patient
     },
   });
   if (!result) {
@@ -29,6 +36,7 @@ const createConsultation = asyncHandler(async (req, res, next) => {
   const result = await db.consultation.create({
     data: {
       ...body,
+      id_patient: body.id_patient,
     },
   });
 

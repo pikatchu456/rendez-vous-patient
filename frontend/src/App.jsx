@@ -1,6 +1,11 @@
 import React from "react";
 import { Route, Routes } from "react-router-dom";
-import { ClerkLoaded, ClerkLoading, SignedIn, SignedOut } from "@clerk/clerk-react";
+import {
+  ClerkLoaded,
+  ClerkLoading,
+  SignedIn,
+  SignedOut,
+} from "@clerk/clerk-react";
 import Login from "./layouts/Login.jsx";
 import SignUpOne from "./layouts/SignUpOne.jsx";
 import AdminLayout from "./layouts/AdminLayout.jsx";
@@ -14,8 +19,6 @@ import Loader from "./components/Loader/Loader.jsx";
 import SignUp from "./layouts/SignUp.jsx";
 import ConsultationAdmin from "./pages/ConsultationAdmin.jsx";
 import PlanificationAdmin from "./pages/PlanificationAdmin.jsx";
-
-
 
 const App = () => {
   return (

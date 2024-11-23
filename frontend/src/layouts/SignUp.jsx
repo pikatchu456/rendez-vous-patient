@@ -94,45 +94,71 @@ const SignUp = () => {
   // Handle verification code submission
   const onSubmitValidation = async (data) => {
     try {
+      // First complete the Clerk signup
       const completeSignUp = await signUp.attemptEmailAddressVerification({
         code: data.code,
       });
 
       if (completeSignUp.status !== "complete") {
-        console.log(JSON.stringify(completeSignUp, null, 2));
+        console.log(
+          "Signup not complete:",
+          JSON.stringify(completeSignUp, null, 2)
+        );
         return;
       }
 
-      // Create account in your database
-      await createAccountPatient({
+      // Then create account in your database
+      const patientData = {
         clerkId: completeSignUp.createdUserId,
         email: getValuesSignUp("email"),
         username: getValuesSignUp("username"),
-      }).unwrap();
+      };
 
-      // Set active session
+      console.log("Creating patient account with data:", patientData);
+
+      const result = await createAccountPatient(patientData).unwrap();
+      console.log("Patient account created:", result);
+
+      // Only set active session after both operations succeed
       await setActive({ session: completeSignUp.createdSessionId });
 
       // Redirect to home
       navigate("/consultation1");
     } catch (err) {
-      const error = err.errors?.[0];
-      if (error) {
-        setErrorValidation("code", { message: error.message });
+      console.error("Error in validation:", err);
+
+      // Check if it's a clerk error
+      if (err.errors?.[0]) {
+        setErrorValidation("code", { message: err.errors[0].message });
+        return;
       }
+
+      // Check if it's an API error
+      if (err.data?.message) {
+        setErrorValidation("code", { message: err.data.message });
+        return;
+      }
+
+      // Generic error
+      setErrorValidation("code", {
+        message: "An error occurred during account creation. Please try again.",
+      });
     }
   };
 
-    return (
+  return (
     <main className="w-full h-screen grid grid-cols-1 sm:grid-cols-2">
       <div className="flex justify-center items-center flex-col">
         <h1 className="text-center font-bold text-2xl py-6">
           Sign up to create an account
         </h1>
-        
+
         <div className="w-full px-8 flex flex-col space-y-4">
           {!pendingVerification ? (
-            <form onSubmit={handleSubmitSignup(onSubmitSignUp)} className="flex flex-col space-y-4">
+            <form
+              onSubmit={handleSubmitSignup(onSubmitSignUp)}
+              className="flex flex-col space-y-4"
+            >
               <Input
                 state={{ ...registerSignup("email") }}
                 isError={errorsSignup?.email}
@@ -171,18 +197,21 @@ const SignUp = () => {
               </div>
             </form>
           ) : (
-            <form onSubmit={handleSubmitValidation(onSubmitValidation)} className="flex flex-col space-y-4">
+            <form
+              onSubmit={handleSubmitValidation(onSubmitValidation)}
+              className="flex flex-col space-y-4"
+            >
               <Input
                 state={{ ...registerValidation("code") }}
                 isError={errorsValidation?.code}
                 errorMessage={errorsValidation?.code?.message}
                 name="code"
                 type="text"
-                label="Verification Code"
+                label="Verification Code an Email"
               />
 
               <div className="mt-4">
-                <Button type="submit">Verify Email</Button>
+                <Button type="submit">Check code</Button>
               </div>
             </form>
           )}
@@ -215,6 +244,5 @@ const SignUp = () => {
     </main>
   );
 };
-
 
 export default SignUp;

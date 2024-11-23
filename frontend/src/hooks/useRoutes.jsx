@@ -10,7 +10,6 @@ import { FaTooth, FaUserInjured } from "react-icons/fa";
 import { useLocation } from "react-router-dom";
 
 export const useRoutes = () => {
-
   const DentisteIcon = () => (
     <FaTooth style={{ color: "white", stroke: "black", strokeWidth: 40 }} />
   );
