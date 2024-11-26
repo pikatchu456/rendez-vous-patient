@@ -1,10 +1,5 @@
 import { useMemo } from "react";
-import {
-  GoCommentDiscussion,
-  GoHome,
-  GoTasklist,
-  GoCalendar,
-} from "react-icons/go";
+import { GoHome, GoTasklist, GoCalendar } from "react-icons/go";
 import { FaTooth, FaUserInjured } from "react-icons/fa";
 import { useLocation } from "react-router-dom";
 
@@ -55,13 +50,6 @@ export const useRoutes = () => {
         icon: GoCalendar,
         path: "/planification1",
         active: location === "/planification1",
-        roles: ["DENTISTE", "DENTISTE_INTERVENANT"],
-      },
-      {
-        title: "Message",
-        icon: GoCommentDiscussion,
-        path: "/message",
-        active: location === "/message",
         roles: ["DENTISTE", "DENTISTE_INTERVENANT"],
       },
       {

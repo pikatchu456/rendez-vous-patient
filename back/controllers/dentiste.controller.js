@@ -32,6 +32,7 @@ const createDentiste = asyncHandler(async (req, res, next) => {
       ...body,
     },
   });
+  req.io.emit("createDentiste", result);
 
   res.status(201).json({
     message: "Dentiste créé avec succès",
@@ -52,6 +53,7 @@ const updateDentiste = asyncHandler(async (req, res, next) => {
       ...body,
     },
   });
+  req.io.emit("updateDentiste", result);
 
   res.status(200).json({
     message: "Dentiste mis à jour avec succès",
@@ -68,6 +70,8 @@ const deleteDentiste = asyncHandler(async (req, res, next) => {
       id_dentiste: id_dentiste,
     },
   });
+  req.io.emit("deleteDentiste", result);
+
 
   res.status(200).json({
     message: "Dentiste supprimé avec succès",

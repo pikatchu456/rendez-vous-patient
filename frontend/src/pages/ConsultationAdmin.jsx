@@ -20,12 +20,20 @@ import { HiOutlinePencil, HiOutlineTrash } from "react-icons/hi2";
 import Select from "../components/Select";
 import SelectPatient from "../components/SelectPatient";
 import { FaFilePdf } from "react-icons/fa";
+import { io } from "socket.io-client";
 
 const schema = yup.object().shape({
   date_consultation: yup
     .date()
     .required("Entrer la date de la consultation")
     .typeError("La date de consultation doit être une date valide"),
+  heures: yup
+    .string()
+    .required("Entrer l'heure de la consultation")
+    .matches(
+      /^([01]\d|2[0-3]):([0-5]\d)$/,
+      "Format de l'heure invalide (HH:MM)"
+    ),
   motif: yup.string().required("Entrer le motif de la consultation"),
   status: yup
     .string()
@@ -50,6 +58,7 @@ const ConsultationAdmin = () => {
   const [deleteModal, setDeleteModal] = useState(false);
   const toggleDeleteModal = () => setDeleteModal(!deleteModal);
   const [selectedId, setSelectedId] = useState(null);
+  const [socket, setSocket] = useState(null);
   const { loading, data, error, refetch } = useQuery("/api/consultation");
 
   const isPatient = userRole === "PATIENT";
@@ -57,6 +66,41 @@ const ConsultationAdmin = () => {
   /*paginations */
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 3;
+
+  // WebSocket connection setup
+  useEffect(() => {
+    const newSocket = io("http://localhost:3000", {
+      // Ajoutez des paramètres de configuration supplémentaires si nécessaire
+      reconnection: true,
+      reconnectionAttempts: 5,
+      reconnectionDelay: 1000,
+    });
+
+    // Logs de débogage
+    newSocket.on("connect", () => {
+      console.log("Connected to WebSocket server");
+    });
+
+    newSocket.on("connect_error", (error) => {
+      console.error("WebSocket connection error:", error);
+    });
+
+    // Écouteurs génériques pour tous les types de consultations
+    newSocket.on("consultationEvent", (eventData) => {
+      console.log("Consultation Event Received:", eventData);
+      refetch(); // Rechargez les données pour tous les événements
+    });
+
+    // Stockez le socket
+    setSocket(newSocket);
+
+    // Nettoyage
+    return () => {
+      if (newSocket) {
+        newSocket.disconnect();
+      }
+    };
+  }, []); // Tableau de dépendances vide pour n'exécuter qu'une seule fois
 
   // Calculate pagination values
   const totalPages = data ? Math.ceil(data.length / itemsPerPage) : 0;
@@ -88,10 +132,11 @@ const ConsultationAdmin = () => {
         </div>
         <TableRow
           bg=" bg-slate-950  text-white font-bold"
-          col="grid-cols-[1fr,1fr,1fr,1fr,max-content]"
+          col="grid-cols-[1fr,1fr,1fr,1fr,1fr,max-content]"
         >
           <p className="md:hidden">Informations</p>
           <p className="hidden md:block">Date</p>
+          <p className="hidden md:block">Heures</p>
           <p className="hidden md:block">Motif</p>
           <p className="hidden md:block">Status</p>
           <p className="hidden md:block">Nom du Patient</p>
@@ -114,7 +159,7 @@ const ConsultationAdmin = () => {
           currentItems?.map((item) => (
             <TableRow
               key={item.id_consultation}
-              col={`dark:bg-slate-900 grid-cols-1 md:grid-cols-[1fr,1fr,1fr,1fr${
+              col={`dark:bg-slate-900 grid-cols-1 md:grid-cols-[1fr,1fr,1fr,1fr,1fr${
                 userRole !== "patient" ? ",max-content" : ""
               }]`}
             >
@@ -122,6 +167,11 @@ const ConsultationAdmin = () => {
                 {" "}
                 <span className="font-bold md:hidden">Date :</span>
                 {formatDate(item.date_consultation)}
+              </p>
+              <p>
+                {" "}
+                <span className="font-bold md:hidden">Heure :</span>
+                {item.heures}
               </p>
               <p>
                 {" "}
@@ -185,7 +235,12 @@ const ConsultationAdmin = () => {
         </button>
       </div>
 
-      <AddModal refetch={refetch} open={addModal} setOpen={setAddModal} />
+      <AddModal
+        refetch={refetch}
+        open={addModal}
+        setOpen={setAddModal}
+        socket={socket}
+      />
 
       {!isPatient && (
         <>
@@ -195,6 +250,7 @@ const ConsultationAdmin = () => {
             setOpen={setDeleteModal}
             id_consultation={selectedId}
             setSelectedId={setSelectedId}
+            socket={socket}
           />
           <UpdateModal
             refetch={refetch}
@@ -202,6 +258,7 @@ const ConsultationAdmin = () => {
             setOpen={setUpdateModal}
             id_consultation={selectedId}
             setSelectedId={setSelectedId}
+            socket={socket}
           />
         </>
       )}
@@ -209,7 +266,7 @@ const ConsultationAdmin = () => {
   );
 };
 
-const AddModal = ({ open, setOpen, refetch }) => {
+const AddModal = ({ open, setOpen, refetch, socket }) => {
   const {
     register,
     handleSubmit,
@@ -229,6 +286,10 @@ const AddModal = ({ open, setOpen, refetch }) => {
   const onSubmit = async (data) => {
     setShow(false);
     const res = await mutationFn(data);
+
+    if (socket && res) {
+      socket.emit("consultationAdded", res);
+    }
     refetch();
     reset();
   };
@@ -257,6 +318,13 @@ const AddModal = ({ open, setOpen, refetch }) => {
                 errorMessage={errors?.date_consultation?.message}
                 state={{ ...register("date_consultation") }}
                 isError={errors?.date_consultation}
+              />
+              <Input
+                label="Heure de Consultation"
+                type="time"
+                errorMessage={errors?.heures?.message}
+                state={{ ...register("heures") }}
+                isError={errors?.heures}
               />
               <Input
                 label="Motif"
@@ -329,6 +397,7 @@ const UpdateModal = ({
   refetch,
   id_consultation,
   setSelectedId,
+  socket,
 }) => {
   const {
     register,
@@ -357,6 +426,7 @@ const UpdateModal = ({
   useEffect(() => {
     if (data !== null) {
       setValue("date_consultation", formatDate(data.date_consultation));
+      setValue("heures", data.heures);
       setValue("motif", data.motif);
       setValue("status", data.status);
       if (data.patient) {
@@ -368,6 +438,7 @@ const UpdateModal = ({
   useEffect(() => {
     if (!open) {
       setValue("date_consultation", "");
+      setValue("heures", "");
       setValue("motif", "");
       setValue("status", "");
       setValue("id_patient", "");
@@ -378,7 +449,10 @@ const UpdateModal = ({
 
   const onSubmit = async (data) => {
     setShow(false);
-    await mutationFn(data);
+    const res = await mutationFn(data);
+    if (socket && res) {
+      socket.emit("consultationUpdated", res);
+    }
     refetch();
   };
 
@@ -411,6 +485,13 @@ const UpdateModal = ({
                   errorMessage={errors?.date_consultation?.message}
                   state={{ ...register("date_consultation") }}
                   isError={errors?.date_consultation}
+                />
+                <Input
+                  label="Heure de Consultation"
+                  type="time"
+                  errorMessage={errors?.heures?.message}
+                  state={{ ...register("heures") }}
+                  isError={errors?.heures}
                 />
                 <Input
                   label="Motif"
@@ -483,6 +564,7 @@ const DeleteModal = ({
   refetch,
   id_consultation,
   setSelectedId,
+  socket,
 }) => {
   const { mutationFn, error, loading, success } = useMutation(
     `/api/consultation/${id_consultation}`,
@@ -494,6 +576,9 @@ const DeleteModal = ({
   const deleteHandler = async () => {
     setShow(false);
     await mutationFn();
+    if (socket) {
+      socket.emit("consultationDeleted", id_consultation);
+    }
     setSelectedId(null);
     refetch();
   };
@@ -584,27 +669,34 @@ const Actions = ({
     toggleUpdateModal();
   };
 
+  const [isLoading, setIsLoading] = useState(false);
+
   const generatePDFWithId = async (id_consultation) => {
     try {
-      const response = await fetch(`/api/pdf/${id_consultation}`);
+      // Ajouter un état de chargement
+      setIsLoading(true); // Vous devrez créer cet état avec useState
+
+      const response = await fetch(`/api/consultation/pdf/${id_consultation}`);
+      if (!response.ok) {
+        throw new Error(`Erreur HTTP: ${response.status}`);
+      }
+
       const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
       const link = document.createElement("a");
-      link.href = URL.createObjectURL(blob);
+      link.href = url;
       link.download = `consultation_${id_consultation}.pdf`;
+      document.body.appendChild(link);
       link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
     } catch (error) {
       console.error("Error generating PDF:", error);
+      alert("Erreur lors de la génération du PDF");
+    } finally {
+      setIsLoading(false); // Désactiver l'état de chargement
     }
   };
-
-  const generatePDF = async () => {
-    try {
-      await generatePDFWithId(id_consultation);
-    } catch (error) {
-      console.error("Error generating PDF:", error);
-    }
-  };
-
   return (
     <div className="flex space-x-2">
       <div className="flex items-center space-x-3">
@@ -618,7 +710,7 @@ const Actions = ({
         />
         <FaFilePdf
           className="text-xl text-[#FF0000] cursor-pointer"
-          onClick={generatePDF}
+          onClick={() => generatePDFWithId(id_consultation)}
         />
       </div>
     </div>

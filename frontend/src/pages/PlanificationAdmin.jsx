@@ -7,10 +7,9 @@ import Modal from "../components/Modal";
 import Input from "../components/Input";
 import useQuery from "../hooks/useQuery";
 import Loader from "../components/Loader/Loader";
-
+import { io } from "socket.io-client";
 import { Dialog, Transition } from "@headlessui/react";
 import { ExclamationTriangleIcon } from "@heroicons/react/24/outline";
-
 import * as yup from "yup";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -19,6 +18,8 @@ import Success from "../components/Success/Success";
 import { HiOutlinePencil, HiOutlineTrash } from "react-icons/hi2";
 import Dentiste from "./Dentiste";
 import SelectDentiste from "../components/SelectDentiste";
+
+const socket = io("http://localhost:3000");
 
 const schema = yup.object().shape({
   date_service: yup
@@ -47,6 +48,67 @@ const PlanificationAdmin = () => {
   const toggleDeleteModal = () => setDeleteModal(!deleteModal);
   const [selectedId, setSelectedId] = useState(null);
   const { loading, data, error, refetch } = useQuery("/api/planification");
+
+  // Initialize planifications state when data is loaded
+  useEffect(() => {
+    if (data) {
+      setPlanifications(data);
+    }
+  }, [data]);
+
+  // Socket event handlers
+  useEffect(() => {
+    // Handle new planification
+    socket.on("createPlanification", (newPlanification) => {
+      setPlanifications((prev) => [...prev, newPlanification]);
+    });
+
+    // Handle updated planification
+    socket.on("updatePlanification", (updatedPlanification) => {
+      setPlanifications((prev) =>
+        prev.map((planification) =>
+          planification.id_planification ===
+          updatedPlanification.id_planification
+            ? { ...planification, ...updatedPlanification }
+            : planification
+        )
+      );
+    });
+
+    // Handle deleted planification
+    socket.on("deletePlanification", (deletedPlanification) => {
+      setPlanifications((prev) =>
+        prev.filter(
+          (planification) =>
+            planification.id_planification !==
+            deletedPlanification.id_planification
+        )
+      );
+    });
+
+    // Connection status handlers
+    socket.on("connect", () => {
+      console.log("Connected to WebSocket server");
+    });
+
+    socket.on("disconnect", () => {
+      console.log("Disconnected from WebSocket server");
+    });
+
+    socket.on("error", (error) => {
+      console.error("WebSocket error:", error);
+    });
+
+    // Cleanup function
+    return () => {
+      socket.off("createPlanification");
+      socket.off("updatePlanification");
+      socket.off("deletePlanification");
+      socket.off("connect");
+      socket.off("disconnect");
+      socket.off("error");
+    };
+  }, []);
 
   /*paginations */
   const [currentPage, setCurrentPage] = useState(1);
@@ -181,13 +243,19 @@ const PlanificationAdmin = () => {
         </button>
       </div>
 
-      <AddModal refetch={refetch} open={addModal} setOpen={setAddModal} />
+      <AddModal
+        refetch={refetch}
+        open={addModal}
+        setOpen={setAddModal}
+        socket={socket}
+      />
       <DeleteModal
         refetch={refetch}
         open={deleteModal}
         setOpen={setDeleteModal}
         id_planification={selectedId}
         setSelectedId={setSelectedId}
+        socket={socket}
       />
       <UpdateModal
         refetch={refetch}
@@ -195,12 +263,13 @@ const PlanificationAdmin = () => {
         setOpen={setUpdateModal}
         id_planification={selectedId}
         setSelectedId={setSelectedId}
+        socket={socket}
       />
     </main>
   );
 };
 
-const AddModal = ({ open, setOpen, refetch }) => {
+const AddModal = ({ open, setOpen, refetch, socket }) => {
   const {
     register,
     handleSubmit,
@@ -318,6 +387,7 @@ const UpdateModal = ({
   refetch,
   id_planification,
   setSelectedId,
+  socket,
 }) => {
   const {
     register,
@@ -343,14 +413,12 @@ const UpdateModal = ({
     return date.toISOString().split("T")[0];
   };
 
-
   useEffect(() => {
     if (data !== null) {
       setValue("date_service", formatDate(data.date_service));
       setValue("heures_debut", data.heures_debut);
       setValue("heures_fin", data.heures_fin);
       setValue("id_dentiste", data?.dentiste?.id ?? "");
-  
     }
   }, [data]);
 
@@ -471,6 +539,7 @@ const DeleteModal = ({
   refetch,
   id_planification,
   setSelectedId,
+  socket,
 }) => {
   const { mutationFn, error, loading, success } = useMutation(
     `/api/planification/${id_planification}`,

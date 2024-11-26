@@ -15,6 +15,7 @@ datasource db {
 model Consultation {
   id_consultation  String @id @default(auto()) @map("_id") @db.ObjectId  
   date_consultation DateTime
+  heures String
   motif String
   status String
 

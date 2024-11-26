@@ -37,6 +37,7 @@ const createPlanification = asyncHandler(async (req, res, next) => {
       id_dentiste: body.id_dentiste,
     },
   });
+  req.io.emit("createPlanification", result);
 
   res.status(201).json({
     message: "Planification créée avec succès",
@@ -57,6 +58,7 @@ const updatePlanification = asyncHandler(async (req, res, next) => {
       ...body,
     },
   });
+  req.io.emit("updatePlanification", result);
 
   res.status(200).json({
     message: "Planification mise à jour avec succès",
@@ -73,6 +75,7 @@ const deletePlanification = asyncHandler(async (req, res, next) => {
       id_planification: id_planification,
     },
   });
+  req.io.emit("deletePlanification", result);
 
   res.status(200).json({
     message: "Planification supprimée avec succès",

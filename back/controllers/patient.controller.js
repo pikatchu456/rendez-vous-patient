@@ -31,7 +31,8 @@ const createPatient = asyncHandler(async (req, res, next) => {
     data: {
       ...body,
     },
-  });
+  });  
+  req.io.emit("createPatient", result);
 
   res.status(201).json({
     message: "Patient créé avec succès",
@@ -52,6 +53,7 @@ const updatePatient = asyncHandler(async (req, res, next) => {
       ...body,
     },
   });
+  req.io.emit("updatePatient", result);
 
   res.status(200).json({
     message: "Patient mis à jour avec succès",
@@ -68,6 +70,7 @@ const deletePatient = asyncHandler(async (req, res, next) => {
       id_patient: id_patient,
     },
   });
+   req.io.emit("deletePatient", result);
 
   res.status(200).json({
     message: "Patient supprimé avec succès",

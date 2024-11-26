@@ -54,7 +54,7 @@ const Login = () => {
         localStorage.setItem("userRole", role);
         const redirectToAppropriatePage = (role) => {
           if (role === "PATIENT") {
-            return "/consultation1";
+            return "/dashboard1";
           } else if (role === "DENTISTE" || role === "DENTISTE_INTERVENANT") {
             return "/dashboard";
           }

@@ -16,7 +16,7 @@ const DashboardPatient = () => {
               Bienvenue, {user?.username || "Patient"}! 👋
             </h2>
             <p className="text-lg md:text-xl text-gray-600 dark:text-slate-300">
-              Nous sommes heureux de vous revoir pour votre consultation
+              Nous sommes heureux de vous revoir pour une consultation
             </p>
           </div>
         </div>
