@@ -267,6 +267,9 @@ const ConsultationAdmin = () => {
 };
 
 const AddModal = ({ open, setOpen, refetch, socket }) => {
+  const userRole = localStorage.getItem("userRole")?.toUpperCase();
+  const isPatient = userRole === "PATIENT";
+
   const {
     register,
     handleSubmit,
@@ -333,17 +336,19 @@ const AddModal = ({ open, setOpen, refetch, socket }) => {
                 state={{ ...register("motif") }}
                 isError={errors?.motif}
               />
-              <Select
-                label="Statut"
-                options={[
-                  { value: "en attente", label: "En attente" },
-                  { value: "confirme", label: "Confirmé" },
-                  { value: "annule", label: "Annulé" },
-                ]}
-                errorMessage={errors?.status?.message}
-                state={{ ...register("status") }}
-                isError={errors?.status}
-              />
+              {!isPatient && (
+                <Select
+                  label="Statut"
+                  options={[
+                    { value: "en attente", label: "En attente" },
+                    { value: "confirme", label: "Confirmé" },
+                    { value: "annule", label: "Annulé" },
+                  ]}
+                  errorMessage={errors?.status?.message}
+                  state={{ ...register("status") }}
+                  isError={errors?.status}
+                />
+              )}
 
               <SelectPatient
                 register={register}
@@ -692,7 +697,6 @@ const Actions = ({
       window.URL.revokeObjectURL(url);
     } catch (error) {
       console.error("Error generating PDF:", error);
-      alert("Erreur lors de la génération du PDF");
     } finally {
       setIsLoading(false); // Désactiver l'état de chargement
     }

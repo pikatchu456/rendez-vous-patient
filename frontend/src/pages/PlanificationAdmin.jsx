@@ -47,6 +47,7 @@ const PlanificationAdmin = () => {
   const [deleteModal, setDeleteModal] = useState(false);
   const toggleDeleteModal = () => setDeleteModal(!deleteModal);
   const [selectedId, setSelectedId] = useState(null);
+  const [planifications, setPlanifications] = useState([]);
   const { loading, data, error, refetch } = useQuery("/api/planification");
 
   // Initialize planifications state when data is loaded
@@ -418,7 +419,9 @@ const UpdateModal = ({
       setValue("date_service", formatDate(data.date_service));
       setValue("heures_debut", data.heures_debut);
       setValue("heures_fin", data.heures_fin);
-      setValue("id_dentiste", data?.dentiste?.id ?? "");
+      if (data.dentiste) {
+        setValue("id_dentiste", data.dentiste.id_dentiste);
+      }
     }
   }, [data]);
 
@@ -489,9 +492,8 @@ const UpdateModal = ({
                 <SelectDentiste
                   register={register}
                   errors={errors}
-                  setValue={(value) => {
-                    setValue("id_dentiste", value);
-                  }}
+                  setValue={setValue}
+                  defaultValue={data?.dentiste?.id_dentiste}
                 />
 
                 <div className="flex mt-4 items-center justify-between">

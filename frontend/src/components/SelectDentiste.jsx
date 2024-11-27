@@ -19,7 +19,6 @@ const SelectDentiste = ({ register, errors, setValue }) => {
     setValue("id_dentiste", event.target.value);
   };
 
-
   return (
     <select {...register("id_dentiste")} onChange={handleChange}>
       <option value="">Sélectionnez un dentiste</option>

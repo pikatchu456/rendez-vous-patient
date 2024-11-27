@@ -22,7 +22,7 @@ const SelectPatient = ({ register, errors, setValue }) => {
       <option value="">Sélectionnez un patient</option>
       {patients.map((patient) => (
         <option key={patient.id_patient} value={patient.id_patient}>
-                  {patient.prenom_patient}  {patient.nom_patient} 
+          {patient.prenom_patient} {patient.nom_patient}
         </option>
       ))}
     </select>
