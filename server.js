@@ -6,6 +6,7 @@ import patient_router from "./back/routes/patient.route.js";
 import consultation_router from "./back/routes/consultation.route.js";
 import compte_router from "./back/routes/compte.route.js";
 import pdf_router from "./back/routes/pdf.route.js";
+import notification_router from "./back/routes/notification.route.js";
 import cors from "cors";
 import axios from "axios";
 import { google } from "googleapis";
@@ -41,12 +42,18 @@ const io = new Server(server, {
 io.on("connection", (socket) => {
   console.log("Un utilisateur s'est connecté :", socket.id);
 
-  // Exemple : Écouter un événement de consultation
+  // Événement de consultation
   socket.on("newConsultation", (data) => {
     console.log("Nouvelle consultation créée :", data);
-
     // Émettre à tous les clients connectés
     io.emit("consultationAdded", data);
+  });
+
+  // Événement de notification
+  socket.on("newNotification", (data) => {
+    console.log("Nouvelle notification :", data);
+    // Broadcast the notification to all connected clients
+    io.emit("notificationReceived", data);
   });
 
   // Gestion de la déconnexion
@@ -74,6 +81,7 @@ app.use("/api/consultation", consultation_router);
 app.use("/api/patient", patient_router);
 app.use("/api/planification", planification_router);
 app.use("/api/dentiste", dentiste_router);
+app.use("/api/notifications", notification_router);
 
 // Lancer le serveur
 server.listen(PORT, () => {

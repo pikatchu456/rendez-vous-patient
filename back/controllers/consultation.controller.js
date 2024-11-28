@@ -2,6 +2,8 @@ import db from "../config/db.js";
 import asyncHandler from "express-async-handler";
 import PDFDocument from "pdfkit";
 import moment from "moment";
+import { createNotification } from "./notification.controller.js";
+
 
 // Récupérer toutes les consultations
 const getConsultation = asyncHandler(async (req, res, next) => {
@@ -34,18 +36,27 @@ const getConsultationById = asyncHandler(async (req, res, next) => {
 // Créer une nouvelle consultation
 const createConsultation = asyncHandler(async (req, res, next) => {
   const body = req.body;
+  const userRole = body.userRole; // Get user role from request body
 
   const result = await db.consultation.create({
     data: {
       ...body,
       id_patient: body.id_patient,
     },
+    include: {
+      patient: true,
+    },
   });
+
+  // Pass user role to notification creation
+  const notifications = await createNotification(result, userRole, req.io);
+
   req.io.emit("createConsultation", result);
 
   res.status(201).json({
     message: "Consultation créée avec succès",
     consultation: result,
+    notifications: notifications,
   });
 });
 

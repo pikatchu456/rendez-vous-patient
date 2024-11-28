@@ -35,13 +35,19 @@ const schema = yup.object().shape({
       "Format de l'heure invalide (HH:MM)"
     ),
   motif: yup.string().required("Entrer le motif de la consultation"),
-  status: yup
-    .string()
-    .required("Entrer le statut de la consultation")
-    .oneOf(
-      ["en attente", "confirme", "annule"],
-      "Le statut doit être 'En attente', 'Confirmé' ou 'Annulé'"
-    ),
+  status: yup.string().when("$isPatient", {
+    is: true,
+    then: () =>
+      yup.string().oneOf(["en attente"], 'Le statut doit être "En attente"'),
+    otherwise: () =>
+      yup
+        .string()
+        .required("Entrer le statut de la consultation")
+        .oneOf(
+          ["en attente", "confirme", "annule"],
+          "Le statut doit être 'En attente', 'Confirmé' ou 'Annulé'"
+        ),
+  }),
 });
 
 const formatDate = (dateString) => {
@@ -270,13 +276,19 @@ const AddModal = ({ open, setOpen, refetch, socket }) => {
   const userRole = localStorage.getItem("userRole")?.toUpperCase();
   const isPatient = userRole === "PATIENT";
 
+  const defaultStatus = isPatient ? "en attente" : undefined;
+
   const {
     register,
     handleSubmit,
     formState: { errors },
     reset,
+    setValue, // Add setValue
   } = useForm({
     resolver: yupResolver(schema),
+    defaultValues: {
+      status: defaultStatus,
+    },
   });
 
   const { mutationFn, error, loading, success } = useMutation(
@@ -287,6 +299,9 @@ const AddModal = ({ open, setOpen, refetch, socket }) => {
   const [show, setShow] = useState(true);
 
   const onSubmit = async (data) => {
+    if (isPatient) {
+      data.status = "en attente";
+    }
     setShow(false);
     const res = await mutationFn(data);
 
