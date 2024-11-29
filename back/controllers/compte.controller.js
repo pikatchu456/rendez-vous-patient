@@ -34,15 +34,35 @@ const createCompteDentiste = asyncHandler(async (req, res, next) => {
 
 const createComptePatient = asyncHandler(async (req, res, next) => {
   try {
+    const { numIns, ...compteData } = req.body;
+
+    const generatedNumIns = numIns || `PATIENT-${Date.now()}`;
+
     const compte = await db.compte.create({
       data: {
-        ...req.body,
+        ...compteData,
+        role: "PATIENT",
+        numIns: generatedNumIns, // Génère un identifiant unique si `numIns` est null
       },
     });
-    res.status(200).json({ message: "Patient créé avec succès", compte });
+
+    res
+      .status(200)
+      .json({ message: "Compte patient créé avec succès", compte });
   } catch (error) {
     console.error("Erreur lors de la création du compte patient :", error);
-    res.status(500).json({ message: "Erreur interne du serveur" });
+
+    if (error.code === "P2002") {
+      return res.status(400).json({
+        message: "Un compte avec cet email, username ou numIns existe déjà",
+        error: error.message,
+      });
+    }
+
+    res.status(500).json({
+      message: "Erreur interne du serveur",
+      error: error.message,
+    });
   }
 });
 
